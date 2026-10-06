@@ -1395,10 +1395,16 @@ function renderFlashcard() {
     recordBtn.addEventListener("touchcancel", (e) => { e.preventDefault(); stopRecording(); });
 
     // --- Массовая генерация карточек и тестов через ИИ (от 1 до 100+ вопросов) ---
+// --- Массовая генерация карточек и тестов через ИИ ---
 window.generateBatchCards = async function() {
   const subjectInput = document.getElementById("ai-subject-name");
   const rawTextInput = document.getElementById("ai-raw-text");
   const batchBtn = document.getElementById("aiBatchBtn");
+
+  if (!subjectInput || !rawTextInput) {
+    showToast("❌ Ошибка интерфейса: поля ввода не найдены");
+    return;
+  }
 
   const category = subjectInput.value.trim();
   const rawText = rawTextInput.value.trim();
@@ -1409,7 +1415,7 @@ window.generateBatchCards = async function() {
     return;
   }
   if (!rawText) {
-    showToast("⚠️ Вставьте сырой текст, вопросы или список тезисов!");
+    showToast("⚠️ Вставьте сырой текст или список вопросов!");
     rawTextInput.focus();
     return;
   }
@@ -1426,20 +1432,20 @@ window.generateBatchCards = async function() {
 
   try {
     const prompt = `Ты профессиональный методист и составитель учебных карточек. 
-Пользователь передал тебе сырой текст (список вопросов, лекцию, конспект или тезисы, от 1 до 100+ пунктов) для предмета "${category}".
-Твоя задача — проанализировать текст, выделить все ключевые вопросы, термины или понятия и составить из них качественные учебные карточки.
+Пользователь передал тебе сырой текст (список вопросов, лекцию или тезисы) для предмета "${category}".
+Твоя задача — проанализировать текст, выделить все ключевые вопросы или понятия и составить из них качественные учебные карточки.
 
 Правила формирования JSON:
 1. Верни ИСКЛЮЧИТЕЛЬНО валидный JSON-массив объектов (без лишнего текста, без markdown-оберток вроде \`\`\`json, только чистый массив [...] ).
 2. Каждый объект в массиве должен содержать поля:
-   - "term": "Вопрос или термин (кратко и четко)",
+   - "term": "Вопрос или термин",
    - "transcription": "",
    - "forms": [],
-   - "definition": "Точный, емкий ответ на вопрос или определение термина",
+   - "definition": "Точный, емкий ответ на вопрос или определение",
    - "example": "",
    - "exampleTranslation": "",
    - "category": "${category}"
-3. Обработай ВСЕ пункты из текста целиком, не пропуская материал.
+3. Обработай материал целиком.
 
 Исходный текст для обработки:
 ${rawText}`;
@@ -1448,13 +1454,23 @@ ${rawText}`;
       batchBtn.innerHTML = `⏳ Смена ключа (${current}/${total})...`;
     });
 
-    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const candidate = data.candidates?.[0];
+    const textResponse = candidate?.content?.parts?.[0]?.text || "";
+    
+    if (!textResponse) {
+      throw new Error("ИИ вернул пустой ответ. Возможно, сработал фильтр безопасности.");
+    }
+
+    // Ищем JSON в ответе (даже если ИИ обернул его в markdown)
     const jsonMatch = textResponse.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) throw new Error("Не удалось найти JSON-массив в ответе ИИ");
+    if (!jsonMatch) {
+      console.error("Ответ ИИ:", textResponse);
+      throw new Error("Не удалось найти JSON-массив в ответе ИИ");
+    }
 
     const parsedArray = JSON.parse(jsonMatch[0]);
     if (!Array.isArray(parsedArray) || parsedArray.length === 0) {
-      throw new Error("ИИ вернул пустой список или неверный формат");
+      throw new Error("ИИ вернул пустой список карточек");
     }
 
     let addedCount = 0;
@@ -1492,13 +1508,14 @@ ${rawText}`;
     switchTab("cardsView");
 
   } catch (err) {
+    console.error("Batch gen error:", err);
     if (err.message.startsWith("QUOTA_EXHAUSTED")) {
       let waitSec = parseRetrySeconds(err.message.split("|")[1]);
       showToast(`⏳ Лимит ключей! Подождите ${waitSec} сек.`);
     } else if (err.message === "NO_API_KEY") {
       showToast("❌ Укажите API Key!");
     } else {
-      showToast(`❌ Ошибка генерации: ${err.message}`);
+      showToast(`❌ Ошибка: ${err.message}`);
     }
   } finally {
     batchBtn.innerHTML = originalText;
