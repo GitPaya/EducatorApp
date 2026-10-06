@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Educator v8 Beta</title>
+    <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b132b">
+
+<link rel="stylesheet" href="style.css?v=3"> 
+</head>
+<>
+
+  <header>
+    <div class="top-bar">
+      <div class="brand-block">
+        <div class="brand">Educator v8 Beta</div>
+        <div class="audio-header-controls">
+          <button type="button" class="toggle-tts-btn active" id="ttsAutoToggle">🔊 Авто: Вкл</button>
+          <select class="speed-select" id="ttsSpeedSelect" title="Скорость озвучки">
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1.0x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+        </div>
+      </div>
+      <div class="controls-group">
+        <div class="filter-group">
+          <label for="categoryFilter">Предмет:</label>
+          <select id="categoryFilter">
+            <option value="ALL">Все предметы</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="studyModeFilter">Режим:</label>
+          <select id="studyModeFilter">
+            <option value="DUE">К повторению</option>
+            <option value="ALL">Все слова</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="flashcardModeSelect">Вид:</label>
+          <select id="flashcardModeSelect">
+            <option value="CLASSIC">Карточки</option>
+            <option value="TEST">Тесты</option>
+          </select>
+        </div>
+        <div class="filter-group" id="testOrderGroup" style="display: none;">
+          <label for="testOrderSelect">Порядок:</label>
+          <select id="testOrderSelect">
+            <option value="RANDOM">Вразброс</option>
+            <option value="SEQUENTIAL">По номерам</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <nav>
+      <button class="tab-btn active" data-tab="cardsView">🎴 Изучение</button>
+      <button class="tab-btn" data-tab="dictionaryView">📖 Словарь</button>
+      <button class="tab-btn" data-tab="addView" id="navAddBtn">➕ Добавить</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="cardsView" class="view active">
+      <div id="flashcardHost"></div>
+      <div class="srs-controls" id="srsControls">
+        <button class="srs-btn" data-days="1">Снова<span>1 дн.</span></button>
+        <button class="srs-btn" data-days="2">Трудно<span>2 дн.</span></button>
+        <button class="srs-btn" data-days="3">Хорошо<span>+3 дн.</span></button>
+        <button class="srs-btn" data-days="7">Легко<span>+7 дн.</span></button>
+      </div>
+      <div class="undo-container">
+        <button type="button" class="undo-btn" id="undoBtn">↩ Отменить выбор</button>
+      </div>
+    </section>
+
+    <section id="dictionaryView" class="view">
+      <div class="dict-toolbar">
+        <input type="text" id="dictSearch" placeholder="🔍 Поиск слова или перевода...">
+        <button class="tab-btn" id="undoDictUpdateBtn" style="display:none; border-color: var(--accent); color: var(--accent);" title="Отменить последнее обновление карточки ИИ">↩ Откат ИИ</button>
+        <button class="tab-btn" id="exportHtmlBtn" style="border-color: var(--card-border);" title="Скачать приложение со всеми словами в коде">📦 Скачать App</button>
+        <button class="tab-btn" id="exportBtn" style="border-color: var(--card-border);" title="Скачать только слова (JSON)">💾 JSON</button>
+        <button class="tab-btn" id="importToggleBtn" style="border-color: var(--card-border);">📂 JSON</button>
+      </div>
+      <textarea id="importTextarea" placeholder="Вставьте сюда массив JSON со словами (например, сгенерированный ИИ) и нажмите кнопку импорта еще раз..."></textarea>
+      
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Термин</th>
+              <th>Определение</th>
+              <th>Предмет</th>
+              <th>Повторение</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="dictionaryTbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="addView" class="view">
+      <div class="voice-module">
+        <div class="voice-module-header">
+          <label>Пул API Ключей (Резервирование Gemini):</label>
+          <div id="apiKeysContainer" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Сюда динамически добавляются строки с ключами -->
+          </div>
+          <button type="button" id="addApiKeyBtn" class="tab-btn-action" style="margin-top: 4px; align-self: flex-start; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; font-size: 0.8rem; padding: 6px 12px;">➕ Добавить новый API Ключ</button>
+        </div>
+        <div class="voice-controls">
+          <button type="button" class="btn-record" id="recordBtn">🎤 Нажми и говори (Полное ИИ-распознавание)</button>
+          <div class="voice-status" id="voiceStatus">Ожидание...</div>
+        </div>
+      </div>
+
+      <form id="wordForm">
+        <input type="hidden" id="editWordId">
+        
+        <div class="form-group">
+          <label for="formTerm">Термин / Концепт</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="text" id="formTerm" required style="flex: 1;">
+            <button type="button" class="tab-btn-action" id="aiFillBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; padding: 0 14px; height: 38px; white-space: nowrap; transition: all 0.2s;" title="Заполнить карточку с помощью ИИ">✨ ИИ</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="formTranscription">Транскрипция</label>
+          <input type="text" id="formTranscription" placeholder="напр: [mʌst hæv]">
+        </div>
+        <div class="form-group">
+          <label for="formForms">Формы слова (форма [транскрипция] - перевод; ...)</label>
+          <input type="text" id="formForms" placeholder="напр: We [wi] - мы; Us [ʌs] - нас">
+        </div>
+        <div class="form-group">
+          <label for="formDefinition">Определение / Перевод базовой формы</label>
+          <textarea id="formDefinition" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="formExample">Пример / Контекст</label>
+          <textarea id="formExample"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="formExampleTranslation">Перевод примера</label>
+          <textarea id="formExampleTranslation" placeholder="Русский перевод предложения..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="formCategory">Предмет / Категория</label>
+          <input type="text" id="formCategory" list="dynamicCategoriesList" placeholder="Выберите или введите новый..." required>
+          <datalist id="dynamicCategoriesList"></datalist>
+        </div>
+        <div>
+          <button type="submit" class="btn-submit" id="formSubmitBtn">Сохранить</button>
+          <button type="button" class="btn-cancel" id="formCancelBtn" style="display:none;">Отмена</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div class="toast-notice" id="toastNotice"></div>
+
+  <div class="bs-overlay" id="bsOverlay"></div>
+  <div class="bottom-sheet" id="wordPanel">
+    <div class="bs-header">
+      <h3 id="wpTerm">Слово</h3>
+      <button class="bs-close" id="wpClose">✕</button>
+    </div>
+    <div class="bs-content" id="wpContent">
+      <div class="bs-loader">🤖 Нейросеть анализирует контекст...</div>
+    </div>
+    <button class="btn-submit btn-full-width" id="wpAddBtn" style="display:none;">Добавить в словарь</button>
+  </div>
+  <script src="database.js?v=3"></script>
+
+  <!-- Подключаем внешние файлы со скриптами в самом конце -->
+  <script src="database.js?v=3"></script>
+  <script src="app.js?v=3"></script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker зарегистрирован!', reg))
+          .catch(err => console.error('Ошибка регистрации Service Worker:', err));
+      });
+    }
+  </script>
+</body>
+</html>
