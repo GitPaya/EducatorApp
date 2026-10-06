@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Educator v8 Beta</title>
-    <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b132b">
 
-<link rel="stylesheet" href="style.css?v=3"> 
+  <link rel="stylesheet" href="style.css?v=3"> 
 </head>
-<>
-
+<body>
   <header>
     <div class="top-bar">
       <div class="brand-block">
@@ -103,62 +102,95 @@
       </div>
     </section>
 
+    <!-- Вкладка "+ Добавить" с аккордеонами -->
     <section id="addView" class="view">
-      <div class="voice-module">
-        <div class="voice-module-header">
-          <label>Пул API Ключей (Резервирование Gemini):</label>
-          <div id="apiKeysContainer" style="display: flex; flex-direction: column; gap: 8px;">
-            <!-- Сюда динамически добавляются строки с ключами -->
+      <div class="add-container" style="padding: 16px; max-width: 760px; margin: 0 auto; box-sizing: border-box;">
+        
+        <!-- Блок 1: Массовая генерация через ИИ -->
+        <div class="accordion-card active">
+          <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🤖 Массовая генерация карточек и тестов</button>
+          <div class="accordion-body">
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Предмет или категория</label>
+              <input type="text" id="ai-subject-name" placeholder="Например: Римское право (Тема 2)" class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Сырой текст, вопросы или список тезисов (от 1 до 100+)</label>
+              <textarea id="ai-raw-text" placeholder="Вставь сюда текст лекции, вопросы из методички или список терминов..." class="app-textarea" rows="6" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
+            </div>
+            <button type="button" id="aiBatchBtn" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">✨ Сгенерировать пачку через ИИ</button>
           </div>
-          <button type="button" id="addApiKeyBtn" class="tab-btn-action" style="margin-top: 4px; align-self: flex-start; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; font-size: 0.8rem; padding: 6px 12px;">➕ Добавить новый API Ключ</button>
         </div>
-        <div class="voice-controls">
-          <button type="button" class="btn-record" id="recordBtn">🎤 Нажми и говори (Полное ИИ-распознавание)</button>
-          <div class="voice-status" id="voiceStatus">Ожидание...</div>
-        </div>
-      </div>
 
-      <form id="wordForm">
-        <input type="hidden" id="editWordId">
-        
-        <div class="form-group">
-          <label for="formTerm">Термин / Концепт</label>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="formTerm" required style="flex: 1;">
-            <button type="button" class="tab-btn-action" id="aiFillBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; padding: 0 14px; height: 38px; white-space: nowrap; transition: all 0.2s;" title="Заполнить карточку с помощью ИИ">✨ ИИ</button>
+        <!-- Блок 2: Пул API Ключей и Голосовое распознавание -->
+        <div class="accordion-card">
+          <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🔑 Пул API Ключей и ИИ-распознавание</button>
+          <div class="accordion-body">
+            <div class="voice-module" style="background: transparent; border: none; padding: 0;">
+              <div class="voice-module-header">
+                <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Пул API Ключей (Резервирование Gemini):</label>
+                <div id="apiKeysContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                  <!-- Сюда динамически добавляются строки с ключами -->
+                </div>
+                <button type="button" id="addApiKeyBtn" class="tab-btn-action" style="margin-top: 4px; align-self: flex-start; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; font-size: 0.8rem; padding: 6px 12px;">➕ Добавить новый API Ключ</button>
+              </div>
+              <div class="voice-controls" style="margin-top: 16px;">
+                <button type="button" class="btn-record" id="recordBtn" style="width: 100%;">🎤 Нажми и говори (Полное ИИ-распознавание)</button>
+                <div class="voice-status" id="voiceStatus" style="text-align: center; margin-top: 6px;">Ожидание...</div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div class="form-group">
-          <label for="formTranscription">Транскрипция</label>
-          <input type="text" id="formTranscription" placeholder="напр: [mʌst hæv]">
+
+        <!-- Блок 3: Ручное добавление термина -->
+        <div class="accordion-card">
+          <button type="button" class="accordion-header" onclick="toggleAccordion(this)">✍️ Ручное добавление термина</button>
+          <div class="accordion-body">
+            <form id="wordForm" style="display: flex; flex-direction: column; gap: 12px;">
+              <input type="hidden" id="editWordId">
+              
+              <div class="form-group" style="margin: 0;">
+                <label for="formTerm" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Термин / Концепт</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="text" id="formTerm" required style="flex: 1; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+                  <button type="button" class="tab-btn-action" id="aiFillBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; cursor: pointer; padding: 0 14px; height: 42px; white-space: nowrap; transition: all 0.2s;" title="Заполнить карточку с помощью ИИ">✨ ИИ</button>
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin: 0;">
+                <label for="formTranscription" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Транскрипция</label>
+                <input type="text" id="formTranscription" placeholder="напр: [mʌst hæv]" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label for="formForms" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Формы слова (форма [транскрипция] - перевод; ...)</label>
+                <input type="text" id="formForms" placeholder="напр: We [wi] - мы; Us [ʌs] - нас" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label for="formDefinition" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Определение / Перевод базовой формы</label>
+                <textarea id="formDefinition" required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label for="formExample" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Пример / Контекст</label>
+                <textarea id="formExample" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label for="formExampleTranslation" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Перевод примера</label>
+                <textarea id="formExampleTranslation" placeholder="Русский перевод предложения..." style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label for="formCategory" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Предмет / Категория</label>
+                <input type="text" id="formCategory" list="dynamicCategoriesList" placeholder="Выберите или введите новый..." required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+                <datalist id="dynamicCategoriesList"></datalist>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 4px;">
+                <button type="submit" class="btn-submit" id="formSubmitBtn" style="flex: 1; padding: 14px; background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Сохранить</button>
+                <button type="button" class="btn-cancel" id="formCancelBtn" style="display:none; padding: 14px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 8px; cursor: pointer;">Отмена</button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="formForms">Формы слова (форма [транскрипция] - перевод; ...)</label>
-          <input type="text" id="formForms" placeholder="напр: We [wi] - мы; Us [ʌs] - нас">
-        </div>
-        <div class="form-group">
-          <label for="formDefinition">Определение / Перевод базовой формы</label>
-          <textarea id="formDefinition" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="formExample">Пример / Контекст</label>
-          <textarea id="formExample"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="formExampleTranslation">Перевод примера</label>
-          <textarea id="formExampleTranslation" placeholder="Русский перевод предложения..."></textarea>
-        </div>
-        <div class="form-group">
-          <label for="formCategory">Предмет / Категория</label>
-          <input type="text" id="formCategory" list="dynamicCategoriesList" placeholder="Выберите или введите новый..." required>
-          <datalist id="dynamicCategoriesList"></datalist>
-        </div>
-        <div>
-          <button type="submit" class="btn-submit" id="formSubmitBtn">Сохранить</button>
-          <button type="button" class="btn-cancel" id="formCancelBtn" style="display:none;">Отмена</button>
-        </div>
-      </form>
+
+      </div>
     </section>
   </main>
 
@@ -175,12 +207,11 @@
     </div>
     <button class="btn-submit btn-full-width" id="wpAddBtn" style="display:none;">Добавить в словарь</button>
   </div>
-  <script src="database.js?v=3"></script>
 
-  <!-- Подключаем внешние файлы со скриптами в самом конце -->
+  <!-- Подключаем скрипты (лишнее дублирование убрано) -->
   <script src="database.js?v=3"></script>
   <script src="app.js?v=3"></script>
-    <script>
+  <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
