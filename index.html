@@ -217,7 +217,15 @@
         navigator.serviceWorker.register('./sw.js').then((reg) => {
           console.log('Service Worker зарегистрирован!', reg);
 
-          // Проверка на наличие обновления при запуске
+          // 1. Если обновление уже скачалось и ждет в фоне
+          if (reg.waiting) {
+            showUpdateToast(reg.waiting);
+          }
+
+          // 2. Принудительно заставляем браузер проверить свежую версию на сервере прямо сейчас
+          reg.update();
+
+          // 3. Отслеживаем появление нового воркера
           reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
@@ -228,7 +236,6 @@
           });
         });
 
-        // Если обновление уже ждет активации
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           if (!refreshing) {
@@ -242,7 +249,7 @@
     // Красивое уведомление об обновлении внизу экрана
     function showUpdateToast(worker) {
       let toast = document.getElementById('updateToast');
-      if (toast) return; // Чтобы не плодить дубликаты
+      if (toast) return;
 
       toast = document.createElement('div');
       toast.id = 'updateToast';
