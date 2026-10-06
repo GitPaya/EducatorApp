@@ -1394,7 +1394,123 @@ function renderFlashcard() {
     recordBtn.addEventListener("touchend", (e) => { e.preventDefault(); stopRecording(); });
     recordBtn.addEventListener("touchcancel", (e) => { e.preventDefault(); stopRecording(); });
 
+    // --- Массовая генерация карточек и тестов через ИИ (от 1 до 100+ вопросов) ---
+window.generateBatchCards = async function() {
+  const subjectInput = document.getElementById("ai-subject-name");
+  const rawTextInput = document.getElementById("ai-raw-text");
+  const batchBtn = document.getElementById("aiBatchBtn");
+
+  const category = subjectInput.value.trim();
+  const rawText = rawTextInput.value.trim();
+
+  if (!category) {
+    showToast("⚠️ Укажите название предмета или темы!");
+    subjectInput.focus();
+    return;
+  }
+  if (!rawText) {
+    showToast("⚠️ Вставьте сырой текст, вопросы или список тезисов!");
+    rawTextInput.focus();
+    return;
+  }
+
+  const keysStr = Storage.getApiKey();
+  if (!keysStr) {
+    showToast("❌ Укажите API Key в пуле ключей ниже!");
+    return;
+  }
+
+  const originalText = batchBtn.innerHTML;
+  batchBtn.innerHTML = "⏳ ИИ обрабатывает пачку...";
+  batchBtn.disabled = true;
+
+  try {
+    const prompt = `Ты профессиональный методист и составитель учебных карточек. 
+Пользователь передал тебе сырой текст (список вопросов, лекцию, конспект или тезисы, от 1 до 100+ пунктов) для предмета "${category}".
+Твоя задача — проанализировать текст, выделить все ключевые вопросы, термины или понятия и составить из них качественные учебные карточки.
+
+Правила формирования JSON:
+1. Верни ИСКЛЮЧИТЕЛЬНО валидный JSON-массив объектов (без лишнего текста, без markdown-оберток вроде \`\`\`json, только чистый массив [...] ).
+2. Каждый объект в массиве должен содержать поля:
+   - "term": "Вопрос или термин (кратко и четко)",
+   - "transcription": "",
+   - "forms": [],
+   - "definition": "Точный, емкий ответ на вопрос или определение термина",
+   - "example": "",
+   - "exampleTranslation": "",
+   - "category": "${category}"
+3. Обработай ВСЕ пункты из текста целиком, не пропуская материал.
+
+Исходный текст для обработки:
+${rawText}`;
+
+    const data = await callGeminiAPI(prompt, null, (current, total) => {
+      batchBtn.innerHTML = `⏳ Смена ключа (${current}/${total})...`;
+    });
+
+    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const jsonMatch = textResponse.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error("Не удалось найти JSON-массив в ответе ИИ");
+
+    const parsedArray = JSON.parse(jsonMatch[0]);
+    if (!Array.isArray(parsedArray) || parsedArray.length === 0) {
+      throw new Error("ИИ вернул пустой список или неверный формат");
+    }
+
+    let addedCount = 0;
+    parsedArray.forEach((item, index) => {
+      if (item.term && item.definition) {
+        const newCard = {
+          id: "w-" + Date.now() + "-" + index,
+          term: item.term.trim(),
+          transcription: item.transcription || "",
+          forms: Array.isArray(item.forms) ? item.forms : [],
+          definition: item.definition.trim(),
+          example: item.example || "",
+          exampleTranslation: item.exampleTranslation || "",
+          category: category
+        };
+        
+        const exists = State.words.some(w => w.term.toLowerCase() === newCard.term.toLowerCase() && w.category.toLowerCase() === category.toLowerCase());
+        if (!exists) {
+          State.words.unshift(newCard);
+          addedCount++;
+        }
+      }
+    });
+
+    Storage.setWords(State.words);
+    State.currentCategory = "ALL";
+    document.getElementById("categoryFilter").value = "ALL";
+    updateCategoryUI();
+    renderDictionary();
+    renderFlashcard();
+
+    rawTextInput.value = "";
+    subjectInput.value = "";
+    showToast(`✨ Успешно создано карточек: ${addedCount}!`);
+    switchTab("cardsView");
+
+  } catch (err) {
+    if (err.message.startsWith("QUOTA_EXHAUSTED")) {
+      let waitSec = parseRetrySeconds(err.message.split("|")[1]);
+      showToast(`⏳ Лимит ключей! Подождите ${waitSec} сек.`);
+    } else if (err.message === "NO_API_KEY") {
+      showToast("❌ Укажите API Key!");
+    } else {
+      showToast(`❌ Ошибка генерации: ${err.message}`);
+    }
+  } finally {
+    batchBtn.innerHTML = originalText;
+    batchBtn.disabled = false;
+  }
+};
     // Инициализация
     updateCategoryUI();
     renderFlashcard();
     renderDictionary();
+    // --- Управление аккордеонами в разделе "+ Добавить" ---
+window.toggleAccordion = function(header) {
+    const card = header.parentElement;
+    card.classList.toggle('active');
+};
