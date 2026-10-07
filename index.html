@@ -7,10 +7,11 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b132b">
 
-  <link rel="stylesheet" href="style.css?v=3"> 
+  <link rel="stylesheet" href="style.css?v=7"> 
 </head>
 <body>
   <header>
+    
     <div class="top-bar">
       <div class="brand-block">
         <div class="brand">Kognitix</div>
@@ -55,12 +56,15 @@
         </div>
       </div>
     </div>
-    <nav>
-      <button class="tab-btn active" data-tab="cardsView">🎴 Изучение</button>
-      <button class="tab-btn" data-tab="dictionaryView">📖 Словарь</button>
-      <button class="tab-btn" data-tab="addView" id="navAddBtn">➕ Добавить</button>
-    </nav>
+
   </header>
+
+<!-- УНИВЕРСАЛЬНЫЙ ПЛАВАЮЩИЙ DOCK (Для ПК и Телефона) -->
+<nav class="floating-dock">
+    <button class="tab-btn active" data-tab="cardsView">🎴 Изучение</button>
+    <button class="tab-btn" data-tab="dictionaryView">📖 Словарь</button>
+    <button class="tab-btn" data-tab="addView" id="navAddBtn">➕ Добавить</button>
+  </nav>
 
   <main>
     <section id="cardsView" class="view active">

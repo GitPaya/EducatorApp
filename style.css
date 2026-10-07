@@ -20,15 +20,16 @@
     }
 
     body {
-      background-color: var(--bg-color);
+      /* Легкое радиальное свечение сверху, чтобы матовое стекло красиво размывало фон */
+      background: radial-gradient(circle at 50% 0%, #152040 0%, var(--bg-color) 70%);
+      background-attachment: fixed;
       color: var(--text-main);
       font-family: var(--font);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* Убрали верхний padding у body, чтобы шапка прилипала к самому краю */
-      padding: 0 16px 24px 16px; 
+      padding: 0 16px 120px 16px; /* Отступ 120px снизу, чтобы плавающий Dock не перекрывал карточки */
       overflow-x: hidden;
     }
 
@@ -43,11 +44,11 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(11, 19, 43, 0.75); /* Полупрозрачный фон */
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding-top: 24px; /* Вернули отступ внутрь шапки */
-      padding-bottom: 8px;
+      background: rgba(11, 19, 43, 0.7); 
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding-top: 24px; 
+      padding-bottom: 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
@@ -57,7 +58,7 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
       padding-bottom: 16px;
     }
 
@@ -68,11 +69,11 @@
     }
 
     .brand {
-      font-size: 1.15rem;
-      font-weight: 600;
+      font-size: 1.25rem;
+      font-weight: 700;
       letter-spacing: 0.5px;
       color: var(--accent);
-      text-shadow: 0 2px 10px rgba(224, 169, 109, 0.3); /* Легкий неон на бренде */
+      text-shadow: 0 2px 10px rgba(224, 169, 109, 0.3);
     }
 
     .audio-header-controls {
@@ -81,8 +82,8 @@
       gap: 6px;
       background: rgba(28, 37, 65, 0.6);
       padding: 4px 8px;
-      border-radius: 4px;
-      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
     .toggle-tts-btn {
@@ -98,8 +99,8 @@
 
     .toggle-tts-btn.active {
       color: var(--accent);
-      border-color: var(--accent);
-      background: var(--card-bg);
+      border-color: rgba(224, 169, 109, 0.3);
+      background: rgba(224, 169, 109, 0.1);
     }
 
     .speed-select {
@@ -134,7 +135,7 @@
       border: 1px solid var(--card-border);
       color: var(--text-main);
       padding: 8px 12px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 0.9rem;
       outline: none;
       font-family: inherit;
@@ -144,78 +145,75 @@
       border-color: var(--accent);
     }
 
-    nav {
+    /* ========================================= */
+    /* УНИВЕРСАЛЬНЫЙ ПЛАВАЮЩИЙ DOCK (НАВИГАЦИЯ)  */
+    /* ========================================= */
+    nav.floating-dock {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      gap: 8px;
-      justify-content: center;
+      gap: 6px;
+      background: rgba(11, 19, 43, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 8px 12px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+      z-index: 1000;
+      width: max-content;
+      max-width: 95vw;
     }
 
-    .tab-btn {
+    .floating-dock .tab-btn {
       background: transparent;
-      border: 1px solid var(--card-border);
+      border: none;
       color: var(--text-muted);
-      padding: 8px 16px;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border-radius: 16px;
       cursor: pointer;
       font-size: 0.95rem;
-      font-weight: 500;
+      font-weight: 600;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .tab-btn.active, .tab-btn:hover {
-      background: rgba(224, 169, 109, 0.1);
+    .floating-dock .tab-btn.active, 
+    .floating-dock .tab-btn:hover {
+      background: rgba(224, 169, 109, 0.15);
       color: var(--accent);
-      border-color: var(--accent);
-      box-shadow: 0 4px 12px rgba(224, 169, 109, 0.15); /* Свечение активной кнопки */
+      box-shadow: 0 4px 12px rgba(224, 169, 109, 0.15);
     }
 
-    /* ========================================= */
-    /* АДАПТИВНОСТЬ ДЛЯ ТЕЛЕФОНОВ (Ширина < 768px) */
-    /* ========================================= */
+    /* Адаптивность Дока и Фона для мобилок */
     @media (max-width: 768px) {
       :root {
-        --bg-color: #000000;
+        --bg-color: #050812; /* Глубокий темный, но не 100% черный для работы стекла */
       }
-      
       body {
-        padding-bottom: 80px; 
+        background: radial-gradient(circle at 50% 0%, #121a2f 0%, var(--bg-color) 60%);
+        background-attachment: fixed;
       }
-
       header {
         padding-top: 16px;
       }
-
-      nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(11, 19, 43, 0.75);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        padding: 12px 16px;
+      nav.floating-dock {
+        bottom: 16px;
+        width: calc(100% - 32px);
         justify-content: space-between;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        z-index: 1000;
-        gap: 4px;
-      }
-
-      .tab-btn {
-        flex: 1;
-        flex-direction: column;
-        border: none;
         padding: 6px;
-        font-size: 0.75rem;
-        border-radius: 12px;
+        border-radius: 20px;
       }
-
-      .tab-btn.active, .tab-btn:hover {
-        background: rgba(224, 169, 109, 0.15);
-        box-shadow: none;
+      .floating-dock .tab-btn {
+        flex-direction: column;
+        padding: 8px 4px;
+        font-size: 0.75rem;
+        flex: 1;
+        gap: 4px;
       }
     }
 
@@ -231,7 +229,7 @@
 
     .view.active {
       display: block;
-      animation: fadeIn 0.4s ease-out; /* Плавное появление вкладок */
+      animation: fadeIn 0.4s ease-out;
     }
 
     @keyframes fadeIn {
@@ -255,20 +253,18 @@
       min-height: 400px;
       display: grid;
       transform-style: preserve-3d;
-      /* KOGNITIX UI: Пружинистая анимация переворота */
       transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
-      border-radius: 16px;
+      border-radius: 20px;
       background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       -webkit-tap-highlight-color: transparent !important;
     }
 
-    /* Свечение карточки при наведении (только для ПК) */
     @media (hover: hover) and (pointer: fine) {
       .flashcard-container:hover .flashcard {
         box-shadow: 0 12px 40px rgba(224, 169, 109, 0.15);
-        border-color: rgba(224, 169, 109, 0.3);
+        border-color: rgba(224, 169, 109, 0.2);
       }
     }
 
@@ -298,7 +294,6 @@
       width: 100%;
     }
 
-    /* KOGNITIX UI: Премиальные градиентные бейджи */
     .badge {
       font-size: 0.75rem;
       text-transform: uppercase;
@@ -306,7 +301,7 @@
       padding: 6px 12px;
       border-radius: 8px;
       background: linear-gradient(135deg, rgba(224, 169, 109, 0.2) 0%, rgba(224, 169, 109, 0.05) 100%);
-      border: 1px solid rgba(224, 169, 109, 0.5);
+      border: 1px solid rgba(224, 169, 109, 0.4);
       color: var(--accent);
       box-shadow: 0 4px 12px rgba(224, 169, 109, 0.15);
       margin-bottom: 20px;
@@ -366,8 +361,8 @@
 
     .meta-block {
       background: rgba(11, 19, 43, 0.3);
-      border-radius: 8px;
-      border-left: 3px solid var(--card-border);
+      border-radius: 12px;
+      border-left: 3px solid rgba(224, 169, 109, 0.5);
       padding: 12px 16px;
       font-size: 0.95rem;
       color: var(--text-muted);
@@ -437,7 +432,7 @@
       color: var(--text-muted);
       background: rgba(11, 19, 43, 0.5);
       padding: 10px 14px;
-      border-radius: 6px;
+      border-radius: 8px;
       border-left: 2px solid var(--accent);
       margin-top: 6px;
       line-height: 1.5;
@@ -458,7 +453,7 @@
     
     .test-option-btn {
       background: rgba(11, 19, 43, 0.5);
-      border: 2px solid var(--card-border);
+      border: 2px solid rgba(255,255,255,0.05);
       color: var(--text-main);
       padding: 16px 20px;
       border-radius: 12px;
@@ -467,14 +462,14 @@
       text-align: left;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       line-height: 1.4;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     }
     
     .test-option-btn:hover:not(:disabled) {
       border-color: var(--accent);
-      background: rgba(224, 169, 109, 0.1);
+      background: rgba(224, 169, 109, 0.05);
       transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(224, 169, 109, 0.2);
+      box-shadow: 0 6px 15px rgba(224, 169, 109, 0.15);
     }
     
     .test-option-btn.correct {
@@ -486,7 +481,7 @@
     }
     
     .test-option-btn.incorrect {
-      background: rgba(239, 71, 111, 0.15) !important; /* var(--danger) neon */
+      background: rgba(239, 71, 111, 0.15) !important;
       border-color: var(--danger) !important;
       color: #fff !important;
       transform: scale(0.98);
@@ -506,10 +501,10 @@
 
     .srs-btn {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      border: 1px solid rgba(255,255,255,0.05);
       color: var(--text-main);
       padding: 10px 6px;
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 0.85rem;
       cursor: pointer;
       display: flex;
@@ -555,7 +550,7 @@
       padding: 48px 16px;
       color: var(--text-muted);
       border: 1px dashed var(--card-border);
-      border-radius: 6px;
+      border-radius: 12px;
     }
 
     /* Dictionary Table & Import/Export */
@@ -582,8 +577,9 @@
 
     .table-wrapper {
       overflow-x: auto;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      background: var(--card-bg);
     }
 
     table {
@@ -595,18 +591,18 @@
 
     th, td {
       padding: 12px 14px;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
       vertical-align: middle;
     }
 
     th {
-      background-color: var(--card-bg);
+      background-color: rgba(11, 19, 43, 0.5);
       color: var(--accent);
       font-weight: 600;
     }
 
     tbody tr:hover {
-      background-color: rgba(28, 37, 65, 0.5);
+      background-color: rgba(224, 169, 109, 0.05);
     }
 
     .dict-term-link {
@@ -656,9 +652,9 @@
     /* Voice Module & Forms */
     .voice-module {
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      border: 1px solid rgba(255,255,255,0.05);
       padding: 20px;
-      border-radius: 6px;
+      border-radius: 12px;
       margin-bottom: 16px;
       display: flex;
       flex-direction: column;
@@ -693,7 +689,7 @@
       align-items: center;
       gap: 10px;
       margin-top: 8px;
-      border-top: 1px solid var(--card-border);
+      border-top: 1px solid rgba(255,255,255,0.05);
       padding-top: 16px;
     }
 
@@ -706,7 +702,7 @@
       padding: 14px 20px;
       font-size: 1rem;
       font-weight: 600;
-      border-radius: 6px;
+      border-radius: 12px;
       cursor: pointer;
       display: flex;
       justify-content: center;
@@ -721,7 +717,7 @@
       background: var(--recording);
       border-color: var(--recording);
       color: #fff;
-      box-shadow: 0 0 12px rgba(230, 57, 70, 0.5);
+      box-shadow: 0 0 15px rgba(230, 57, 70, 0.5);
     }
 
     .btn-record:disabled {
@@ -744,9 +740,9 @@
       flex-direction: column;
       gap: 16px;
       background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      border: 1px solid rgba(255,255,255,0.05);
       padding: 24px;
-      border-radius: 6px;
+      border-radius: 12px;
     }
 
     .form-group {
@@ -770,8 +766,8 @@
       color: #0b132b;
       font-weight: 600;
       border: none;
-      padding: 10px 16px;
-      border-radius: 4px;
+      padding: 12px 16px;
+      border-radius: 8px;
       cursor: pointer;
       align-self: flex-start;
       margin-top: 8px;
@@ -779,16 +775,16 @@
     }
     
     .btn-submit:hover {
-      box-shadow: 0 4px 12px rgba(224, 169, 109, 0.3);
+      box-shadow: 0 4px 15px rgba(224, 169, 109, 0.4);
       transform: translateY(-1px);
     }
 
     .btn-cancel {
       background: transparent;
       color: var(--text-muted);
-      border: 1px solid var(--card-border);
-      padding: 10px 16px;
-      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 12px 16px;
+      border-radius: 8px;
       cursor: pointer;
       margin-left: 8px;
     }
@@ -796,21 +792,21 @@
     /* KOGNITIX UI: Стеклянные уведомления (Toasts) */
     .toast-notice {
       position: fixed;
-      bottom: 24px;
+      bottom: 100px;
       left: 50%;
       transform: translateX(-50%) translateY(30px);
       background: rgba(28, 37, 65, 0.9) !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(224, 169, 109, 0.3);
       color: var(--text-main);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
       pointer-events: none;
       opacity: 0;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       z-index: 10000;
       text-align: center;
       max-width: 90%;
@@ -825,9 +821,9 @@
     .bs-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(11, 19, 43, 0.7);
-      backdrop-filter: blur(4px); /* Легкое размытие заднего фона */
-      -webkit-backdrop-filter: blur(4px);
+      background: rgba(5, 8, 18, 0.8);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
@@ -845,7 +841,7 @@
       width: 100%;
       background: var(--card-bg);
       border-top: 2px solid var(--accent);
-      border-radius: 16px 16px 0 0;
+      border-radius: 24px 24px 0 0;
       padding: 24px;
       transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       z-index: 2001;
@@ -900,37 +896,37 @@
     }
 
     /* Test Results & Progress Bar */
-    .test-progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+    .test-progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
     .test-progress-fill { height: 100%; background: var(--accent); transition: width 0.3s ease; box-shadow: 0 0 10px rgba(224, 169, 109, 0.5); }
     .test-progress-text { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; text-align: right; width: 100%; }
     .test-results { padding: 32px 24px; text-align: center; width: 100%; }
     .test-results h2 { font-size: 1.8rem; color: var(--text-main); margin-bottom: 24px; text-shadow: 0 2px 10px rgba(224, 169, 109, 0.2); }
     .score-circle { width: 120px; height: 120px; border-radius: 50%; border: 6px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 700; color: var(--accent); margin: 0 auto 24px auto; box-shadow: 0 0 20px rgba(224, 169, 109, 0.2), inset 0 0 20px rgba(224, 169, 109, 0.1); }
-    .mistakes-list { text-align: left; margin-top: 24px; max-height: 250px; overflow-y: auto; border-top: 1px solid var(--card-border); padding-top: 16px; }
-    .mistake-item { background: rgba(239, 71, 111, 0.1); border-left: 3px solid var(--danger); padding: 10px 14px; margin-bottom: 8px; border-radius: 4px; font-size: 0.9rem; }
+    .mistakes-list { text-align: left; margin-top: 24px; max-height: 250px; overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; }
+    .mistake-item { background: rgba(239, 71, 111, 0.1); border-left: 3px solid var(--danger); padding: 10px 14px; margin-bottom: 8px; border-radius: 8px; font-size: 0.9rem; }
     .mistake-term { font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
     .mistake-def { color: var(--text-muted); }
     .results-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
-    .btn-primary, .btn-secondary { padding: 12px 20px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary, .btn-secondary { padding: 12px 20px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
     .btn-primary { background: var(--accent); color: var(--bg-color); }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(224, 169, 109, 0.4); }
-    .btn-secondary { background: transparent; border: 2px solid var(--card-border); color: var(--text-main); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(224, 169, 109, 0.4); }
+    .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.1); color: var(--text-main); }
     .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
     
     /* --- Стили для выдвижных панелей (аккордеонов) --- */
     .accordion-card {
         background: #1e2538;
         border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
+        border-radius: 16px;
         margin-bottom: 12px;
         overflow: hidden;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     .accordion-header {
         width: 100%;
-        padding: 16px;
+        padding: 18px 20px;
         background: none;
         border: none;
         color: #fff;
@@ -945,14 +941,14 @@
     }
     
     .accordion-header:hover {
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(255, 255, 255, 0.03);
     }
 
     .accordion-header::after {
         content: '▼';
-        font-size: 11px;
+        font-size: 12px;
         color: var(--accent);
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .accordion-card.active .accordion-header::after {
@@ -962,11 +958,11 @@
     .accordion-body {
         max-height: 0;
         overflow: hidden;
-        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 0 16px;
+        transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0 20px;
     }
 
     .accordion-card.active .accordion-body {
         max-height: 1200px;
-        padding: 0 16px 16px 16px;
+        padding: 0 20px 20px 20px;
     }
