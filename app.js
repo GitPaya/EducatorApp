@@ -1724,6 +1724,66 @@ function showCloudUpdateToast() {
     updateCategoryUI();
     renderFlashcard();
     renderDictionary();
+    // --- СВЕТЛЫЙ / ТЕМНЫЙ РЕЖИМ И ВИБРАЦИЯ ---
+function initThemeAndHaptics() {
+  const themeBtn = document.getElementById("themeToggleBtn");
+  const savedTheme = localStorage.getItem("kognitix_theme") || "dark";
+  
+  if (savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+    if (themeBtn) themeBtn.textContent = "☀️";
+  }
+
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      if (current === "light") {
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("kognitix_theme", "dark");
+        themeBtn.textContent = "🌙";
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("kognitix_theme", "light");
+        themeBtn.textContent = "☀️";
+      }
+      if (navigator.vibrate) navigator.vibrate(20);
+    });
+  }
+}
+initThemeAndHaptics();
+
+// --- УМНЫЕ СВАЙПЫ ДЛЯ КАРТОЧЕК ---
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener("touchstart", e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, {passive: true});
+
+document.addEventListener("touchend", e => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipeCard();
+}, {passive: true});
+
+function handleSwipeCard() {
+  const threshold = 80; // минимальное расстояние для свайпа
+  if (State.flashcardMode === "TEST") return;
+  
+  const diff = touchEndX - touchStartX;
+  if (Math.abs(diff) < threshold) return;
+
+  if (navigator.vibrate) navigator.vibrate([30, 30]); // Умная вибрация при свайпе
+
+  if (diff > 0) {
+    // Свайп ВПРАВО (Логово «Легко» / «Хорошо» -> засчитываем как выученное, например +7 дней)
+    processSRS(7);
+    showToast("👉 Свайп вправо: Отлично (+7 дней)");
+  } else {
+    // Свайп ВЛЕВО (Логово «Снова» -> на повторение через 1 день)
+    processSRS(1);
+    showToast("👈 Свайп влево: Повторим снова (1 день)");
+  }
+}
     // --- Управление аккордеонами в разделе "+ Добавить" ---
 window.toggleAccordion = function(header) {
     const card = header.parentElement;
