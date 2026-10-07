@@ -10,13 +10,14 @@
   <link rel="stylesheet" href="style.css?v=9"> 
 </head>
 <body>
-  <header>
-    
-    <div class="top-bar">
-      <div class="brand-block">
-        <div class="brand">Kognitix</div>
+  <header class="kognitix-header">
+    <!-- Верхняя строка: Большой премиальный бренд и быстрый плеер -->
+    <div class="header-main-row">
+      <h1 class="brand-logo">Kognitix</h1>
+      
+      <div class="header-right-tools">
         <div class="audio-header-controls">
-          <button type="button" class="toggle-tts-btn active" id="ttsAutoToggle">🔊 Авто: Вкл</button>
+          <button type="button" class="toggle-tts-btn active" id="ttsAutoToggle">🔊 Авто</button>
           <select class="speed-select" id="ttsSpeedSelect" title="Скорость озвучки">
             <option value="0.5">0.5x</option>
             <option value="0.75">0.75x</option>
@@ -26,37 +27,31 @@
           </select>
         </div>
       </div>
-      <div class="controls-group">
-        <div class="filter-group">
-          <label for="categoryFilter">Предмет:</label>
-          <select id="categoryFilter">
-            <option value="ALL">Все предметы</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="studyModeFilter">Режим:</label>
-          <select id="studyModeFilter">
-            <option value="DUE">К повторению</option>
-            <option value="ALL">Все слова</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="flashcardModeSelect">Вид:</label>
-          <select id="flashcardModeSelect">
-            <option value="CLASSIC">Карточки</option>
-            <option value="TEST">Тесты</option>
-          </select>
-        </div>
-        <div class="filter-group" id="testOrderGroup" style="display: none;">
-          <label for="testOrderSelect">Порядок:</label>
-          <select id="testOrderSelect">
-            <option value="RANDOM">Вразброс</option>
-            <option value="SEQUENTIAL">По номерам</option>
-          </select>
-        </div>
-      </div>
     </div>
 
+    <!-- Вторая строка: Компактные и чистые фильтры без колхозных подписей -->
+    <div class="filters-minimal-row">
+      <select id="categoryFilter" class="minimal-select" title="Предмет">
+        <option value="ALL">📂 Все предметы</option>
+      </select>
+      
+      <select id="studyModeFilter" class="minimal-select" title="Режим">
+        <option value="DUE">🔥 К повторению</option>
+        <option value="ALL">📚 Все слова</option>
+      </select>
+      
+      <select id="flashcardModeSelect" class="minimal-select" title="Вид">
+        <option value="CLASSIC">🎴 Карточки</option>
+        <option value="TEST">📝 Тесты</option>
+      </select>
+
+      <div id="testOrderGroup" style="display: none;">
+        <select id="testOrderSelect" class="minimal-select" title="Порядок">
+          <option value="RANDOM">🔀 Вразброс</option>
+          <option value="SEQUENTIAL">🔢 По номерам</option>
+        </select>
+      </div>
+    </div>
   </header>
 
 <!-- УНИВЕРСАЛЬНЫЙ ПЛАВАЮЩИЙ DOCK (Для ПК и Телефона) -->

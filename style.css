@@ -214,3 +214,60 @@ textarea { resize: vertical; min-height: 70px; }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(224, 169, 109, 0.4); }
 .btn-secondary { background: transparent; border: 2px solid rgba(255,255,255,0.1); color: var(--text-main); }
 .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+/* --- НОВЫЙ МИНИМАЛИСТИЧНЫЙ И ПРЕМИАЛЬНЫЙ HEADER --- */
+.kognitix-header {
+  background: rgba(11, 19, 43, 0.85) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 18px 24px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.header-main-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+/* Большое, сочное название сайта */
+.brand-logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #f3c68f 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(224, 169, 109, 0.3);
+  margin: 0;
+}
+
+/* Компактные селекты без слова "Предмет:" и "Режим:" */
+.filters-minimal-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.minimal-select {
+  background: rgba(28, 37, 65, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 130px;
+}
+
+.minimal-select:hover, .minimal-select:focus {
+  border-color: var(--accent);
+  background: rgba(224, 169, 109, 0.08);
+  box-shadow: 0 0 10px rgba(224, 169, 109, 0.15);
+}
