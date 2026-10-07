@@ -103,6 +103,7 @@
     </section>
 
     <!-- Вкладка "+ Добавить" с аккордеонами -->
+<!-- Вкладка "+ Добавить" с аккордеонами -->
     <section id="addView" class="view">
       <div class="add-container" style="padding: 16px; max-width: 760px; margin: 0 auto; box-sizing: border-box;">
         
@@ -122,22 +123,13 @@
           </div>
         </div>
 
-        <!-- Блок 2: Пул API Ключей и Голосовое распознавание -->
+        <!-- Блок 2: Голосовое ИИ-распознавание -->
         <div class="accordion-card">
-          <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🔑 Пул API Ключей и ИИ-распознавание</button>
+          <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🎤 Голосовое ИИ-распознавание</button>
           <div class="accordion-body">
-            <div class="voice-module" style="background: transparent; border: none; padding: 0;">
-              <div class="voice-module-header">
-                <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Пул API Ключей (Резервирование Gemini):</label>
-                <div id="apiKeysContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-                  <!-- Сюда динамически добавляются строки с ключами -->
-                </div>
-                <button type="button" id="addApiKeyBtn" class="tab-btn-action" style="margin-top: 4px; align-self: flex-start; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; font-size: 0.8rem; padding: 6px 12px;">➕ Добавить новый API Ключ</button>
-              </div>
-              <div class="voice-controls" style="margin-top: 16px;">
-                <button type="button" class="btn-record" id="recordBtn" style="width: 100%;">🎤 Нажми и говори (Полное ИИ-распознавание)</button>
-                <div class="voice-status" id="voiceStatus" style="text-align: center; margin-top: 6px;">Ожидание...</div>
-              </div>
+            <div class="voice-controls">
+              <button type="button" class="btn-record" id="recordBtn" style="width: 100%;">🎤 Нажми и говори (Полный ИИ-анализ)</button>
+              <div class="voice-status" id="voiceStatus" style="text-align: center; margin-top: 6px; font-size: 13px; color: var(--text-muted);">Ожидание...</div>
             </div>
           </div>
         </div>
@@ -148,7 +140,6 @@
           <div class="accordion-body">
             <form id="wordForm" style="display: flex; flex-direction: column; gap: 12px;">
               <input type="hidden" id="editWordId">
-              
               <div class="form-group" style="margin: 0;">
                 <label for="formTerm" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Термин / Концепт</label>
                 <div style="display: flex; gap: 8px; align-items: center;">
@@ -156,17 +147,16 @@
                   <button type="button" class="tab-btn-action" id="aiFillBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; cursor: pointer; padding: 0 14px; height: 42px; white-space: nowrap; transition: all 0.2s;" title="Заполнить карточку с помощью ИИ">✨ ИИ</button>
                 </div>
               </div>
-              
               <div class="form-group" style="margin: 0;">
                 <label for="formTranscription" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Транскрипция</label>
                 <input type="text" id="formTranscription" placeholder="напр: [mʌst hæv]" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
               </div>
               <div class="form-group" style="margin: 0;">
-                <label for="formForms" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Формы слова (форма [транскрипция] - перевод; ...)</label>
-                <input type="text" id="formForms" placeholder="напр: We [wi] - мы; Us [ʌs] - нас" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+                <label for="formForms" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Формы слова</label>
+                <input type="text" id="formForms" placeholder="напр: We [wi] - мы" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
               </div>
               <div class="form-group" style="margin: 0;">
-                <label for="formDefinition" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Определение / Перевод базовой формы</label>
+                <label for="formDefinition" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Определение / Перевод</label>
                 <textarea id="formDefinition" required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
               </div>
               <div class="form-group" style="margin: 0;">
@@ -175,11 +165,11 @@
               </div>
               <div class="form-group" style="margin: 0;">
                 <label for="formExampleTranslation" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Перевод примера</label>
-                <textarea id="formExampleTranslation" placeholder="Русский перевод предложения..." style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
+                <textarea id="formExampleTranslation" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
               </div>
               <div class="form-group" style="margin: 0;">
                 <label for="formCategory" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Предмет / Категория</label>
-                <input type="text" id="formCategory" list="dynamicCategoriesList" placeholder="Выберите или введите новый..." required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+                <input type="text" id="formCategory" list="dynamicCategoriesList" placeholder="Выберите или введите..." required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
                 <datalist id="dynamicCategoriesList"></datalist>
               </div>
               <div style="display: flex; gap: 8px; margin-top: 4px;">
@@ -187,6 +177,35 @@
                 <button type="button" class="btn-cancel" id="formCancelBtn" style="display:none; padding: 14px; background: rgba(255,255,255,0.1); color: #fff; border: none; border-radius: 8px; cursor: pointer;">Отмена</button>
               </div>
             </form>
+          </div>
+        </div>
+
+        <!-- Блок 4: Облачная синхронизация (GitHub) -->
+        <div class="accordion-card">
+          <button type="button" class="accordion-header" onclick="toggleAccordion(this)">☁️ Облачная синхронизация</button>
+          <div class="accordion-body">
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Секретный токен GitHub (ghp_...)</label>
+              <input type="password" id="sync-token" placeholder="Вставьте токен..." class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">ID Базы (Gist ID) — появится автоматически после 1-й выгрузки</label>
+              <input type="text" id="sync-gist-id" placeholder="Заполнится само..." class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onclick="uploadToCloud()" style="flex: 1; padding: 14px; background: #2a9d8f; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">⬆️ В облако</button>
+              <button type="button" onclick="downloadFromCloud()" style="flex: 1; padding: 14px; background: #e76f51; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">⬇️ Из облака</button>
+            </div>
+            <div id="sync-status" style="text-align: center; margin-top: 8px; font-size: 13px; color: var(--text-muted);"></div>
+          </div>
+        </div>
+
+        <!-- Блок 5: Пул API Ключей Gemini -->
+        <div class="accordion-card">
+          <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🔑 Пул API Ключей Gemini</button>
+          <div class="accordion-body">
+            <div id="apiKeysContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;"></div>
+            <button type="button" id="addApiKeyBtn" class="tab-btn-action" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; padding: 6px 12px;">➕ Добавить новый API Ключ</button>
           </div>
         </div>
 

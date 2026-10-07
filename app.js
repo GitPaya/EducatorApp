@@ -838,7 +838,7 @@ function renderFlashcard() {
       // Исключаем явное смешивание длинного и короткого
       return currentIsShort ? isShort(wd) : !isShort(wd);
   });
-  
+
   let pool = tier1.length >= 3 ? tier1 : (tier2.length >= 3 ? tier2 : basePool);
   if (pool.length < 3) pool = State.words.filter(w => w.id !== item.id);
   
@@ -1543,6 +1543,183 @@ ${rawText}`;
     batchBtn.disabled = false;
   }
 };
+// --- ОБЛАЧНАЯ СИНХРОНИЗАЦИЯ ЧЕРЕЗ GITHUB GIST ---
+document.addEventListener("DOMContentLoaded", () => {
+    const tokenInput = document.getElementById("sync-token");
+    const gistInput = document.getElementById("sync-gist-id");
+    
+    if (tokenInput) {
+        tokenInput.value = localStorage.getItem("ghToken") || "";
+        tokenInput.addEventListener("input", () => localStorage.setItem("ghToken", tokenInput.value.trim()));
+    }
+    if (gistInput) {
+        gistInput.value = localStorage.getItem("gistId") || "";
+        gistInput.addEventListener("input", () => localStorage.setItem("gistId", gistInput.value.trim()));
+    }
+    
+    // Автопроверка облака через 2 секунды после загрузки приложения
+    setTimeout(checkCloudSync, 2000);
+});
+
+window.uploadToCloud = async function() {
+    const token = localStorage.getItem("ghToken");
+    let gistId = localStorage.getItem("gistId");
+    const statusEl = document.getElementById("sync-status");
+    
+    if (!token) { showToast("❌ Вставьте GitHub Token!"); return; }
+    
+    // Собираем всю базу в один JSON
+    const payload = JSON.stringify({
+        words: State.words,
+        srs: State.srs,
+        timestamp: Date.now()
+    });
+
+    const files = { "educator_db.json": { content: payload } };
+    statusEl.textContent = "⏳ Выгрузка в облако...";
+
+    try {
+        let url = "https://api.github.com/gists";
+        let method = "POST";
+        
+        // Если база уже создавалась ранее, обновляем её
+        if (gistId) {
+            url += "/" + gistId;
+            method = "PATCH";
+        }
+
+        const res = await fetch(url, {
+            method: method,
+            headers: {
+                "Accept": "application/vnd.github.v3+json",
+                "Authorization": `token ${token}`
+            },
+            body: JSON.stringify({
+                description: "Educator v8 Database Backup",
+                public: false,
+                files: files
+            })
+        });
+
+        if (!res.ok) throw new Error("Ошибка API GitHub");
+        
+        const data = await res.json();
+        
+        // Если это первая выгрузка, сохраняем сгенерированный ID
+        if (!gistId) {
+            gistId = data.id;
+            localStorage.setItem("gistId", gistId);
+            document.getElementById("sync-gist-id").value = gistId;
+        }
+        
+        localStorage.setItem("lastSync", Date.now());
+        statusEl.textContent = "✅ Успешно выгружено!";
+        showToast("☁️ База сохранена в облаке!");
+    } catch (err) {
+        console.error(err);
+        statusEl.textContent = "❌ Ошибка выгрузки";
+        showToast("❌ Ошибка синхронизации с GitHub");
+    }
+};
+
+window.downloadFromCloud = async function() {
+    const token = localStorage.getItem("ghToken");
+    const gistId = localStorage.getItem("gistId");
+    const statusEl = document.getElementById("sync-status");
+
+    if (!token || !gistId) { showToast("❌ Нужен Token и Gist ID!"); return; }
+    
+    statusEl.textContent = "⏳ Загрузка из облака...";
+
+    try {
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: { "Authorization": `token ${token}` }
+        });
+        if (!res.ok) throw new Error("Gist не найден");
+        
+        const data = await res.json();
+        const content = data.files["educator_db.json"]?.content;
+        if (!content) throw new Error("Файл базы не найден в Gist");
+
+        const parsed = JSON.parse(content);
+        
+        // Перезаписываем локальную базу облачной
+        if (parsed.words && parsed.srs) {
+            State.words = parsed.words;
+            State.srs = parsed.srs;
+            Storage.setWords(State.words);
+            Storage.setSRS(State.srs);
+            localStorage.setItem("lastSync", parsed.timestamp || Date.now());
+            
+            updateCategoryUI(); 
+            renderDictionary(); 
+            renderFlashcard();
+            
+            statusEl.textContent = "✅ Успешно загружено!";
+            showToast("☁️ База успешно скачана из облака!");
+        }
+    } catch (err) {
+        console.error(err);
+        statusEl.textContent = "❌ Ошибка загрузки";
+        showToast("❌ Ошибка скачивания с GitHub");
+    }
+};
+
+// Функция тихой проверки обновлений в фоне
+async function checkCloudSync() {
+    const token = localStorage.getItem("ghToken");
+    const gistId = localStorage.getItem("gistId");
+    if (!token || !gistId) return; // Если не настроено, ничего не делаем
+
+    try {
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: { "Authorization": `token ${token}` }
+        });
+        if (!res.ok) return;
+        
+        const data = await res.json();
+        const content = data.files["educator_db.json"]?.content;
+        if (!content) return;
+
+        const parsed = JSON.parse(content);
+        const cloudTime = parsed.timestamp || 0;
+        const localTime = parseInt(localStorage.getItem("lastSync")) || 0;
+
+        // Если облачная база новее локальной хотя бы на 10 секунд
+        if (cloudTime > localTime + 10000) {
+            showCloudUpdateToast();
+        }
+    } catch (err) {
+        console.error("Auto-sync check failed", err);
+    }
+}
+
+// Красивое уведомление о найденном сохранении
+function showCloudUpdateToast() {
+    let toast = document.getElementById('cloudSyncToast');
+    if (toast) return;
+
+    toast = document.createElement('div');
+    toast.id = 'cloudSyncToast';
+    toast.style.cssText = `
+        position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+        background: #2a9d8f; color: #fff; padding: 14px 20px; border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 12px;
+        z-index: 10000; font-family: inherit; font-size: 14px; font-weight: 600; animation: slideDown 0.3s ease-out;
+    `;
+    toast.innerHTML = `
+        <span>☁️ Найдено свежее сохранение в облаке!</span>
+        <button id="applyCloudSyncBtn" style="background: #fff; color: #2a9d8f; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">Скачать</button>
+        <button id="closeCloudSyncBtn" style="background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.5); padding: 6px; border-radius: 6px; cursor: pointer;">✕</button>
+    `;
+    document.body.appendChild(toast);
+
+    document.getElementById('applyCloudSyncBtn').addEventListener('click', () => {
+        downloadFromCloud();
+        toast.remove();
+    });
+    document.getElementById('closeCloudSyncBtn').addEventListener('click', () => toast.remove());
+}
     // Инициализация
     updateCategoryUI();
     renderFlashcard();
