@@ -982,7 +982,6 @@ function renderFlashcard() {
     const dictionaryTbody = document.getElementById("dictionaryTbody");
     function renderDictionary() {
       const query = dictSearchInput.value.trim().toLowerCase();
-      
       let filtered = getFilteredWords();
       
       if (query) {
@@ -1011,13 +1010,13 @@ function renderFlashcard() {
         <tr>
           <td><strong class="dict-term-link" onclick="jumpToCard('${w.id}')">${escapeHtml(w.term)}</strong></td>
           <td>${escapeHtml(w.definition)}</td>
-          <td>${escapeHtml(w.category)}</td>
-          <td>${State.srs[w.id] ? formatDate(State.srs[w.id].dueDate) : "Новое"}</td>
+          <td class="hide-on-mobile">${escapeHtml(w.category)}</td>
+          <td class="hide-on-mobile">${State.srs[w.id] ? formatDate(State.srs[w.id].dueDate) : "Новое"}</td>
           <td>
             <div class="actions">
-              <button class="action-btn ai-update" onclick="quickUpdateAI('${w.id}')" title="Авто-обновить через ИИ">✨ ИИ</button>
-              <button class="action-btn" onclick="editWord('${w.id}')">Ред.</button>
-              <button class="action-btn delete" onclick="deleteWord('${w.id}')">Удал.</button>
+              <button class="action-btn ai-update" onclick="quickUpdateAI('${w.id}')" title="Авто-обновить через ИИ">✨</button>
+              <button class="action-btn" onclick="editWord('${w.id}')" title="Редактировать">✏️</button>
+              <button class="action-btn delete" onclick="deleteWord('${w.id}')" title="Удалить">🗑️</button>
             </div>
           </td>
         </tr>
