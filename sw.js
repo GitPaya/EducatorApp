@@ -1,4 +1,4 @@
-const CACHE_NAME = 'educator-v8-cache-v7'; // Подняли версию кэша!
+const CACHE_NAME = 'educator-v8-cache-v8'; // Подняли версию кэша!
 const assetsToCache = [
   './',
   './index.html',
