@@ -7,7 +7,7 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b132b">
 
-  <link rel="stylesheet" href="style.css?v=8"> 
+  <link rel="stylesheet" href="style.css?v=9"> 
 </head>
 <body>
   <header>
@@ -85,13 +85,19 @@
       <input type="text" id="dictSearch" placeholder="🔍 Поиск слова или перевода..." style="flex: 1; min-width: 200px;">
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button type="button" class="action-btn" id="installPwaBtn" style="display:none; background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📱 Скачать App</button>
+        
+        <!-- Кнопка экспорта (JS ищет exportBtn) -->
         <button type="button" class="action-btn" id="exportBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📤 Экспорт</button>
-        <button type="button" class="action-btn" id="importBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📥 Импорт</button>
+        
+        <!-- Кнопка импорта (JS ищет importFile внутри) -->
+        <label class="action-btn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; margin: 0; cursor: pointer;">
+          📥 Импорт <input type="file" id="importFile" accept=".json" style="display:none;">
+        </label>
       </div>
     </div>
     
-    <!-- ТО САМОЕ ПОЛЕ, из-за которого упал JS. Оно скрыто через CSS, но скрипту оно жизненно необходимо! -->
-    <textarea id="importTextarea"></textarea>
+    <!-- Скрытое поле, без которого падает JS -->
+    <textarea id="importTextarea" style="display:none;"></textarea>
         <table>
           <thead>
             <tr>
