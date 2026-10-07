@@ -1,6 +1,6 @@
 {
-  "name": "Educator v8",
-  "short_name": "Educator",
+  "name": "Kognitix",
+  "short_name": "Kognitix",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b132b",
