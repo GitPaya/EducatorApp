@@ -795,29 +795,50 @@ function renderFlashcard() {
   const q = (item.term || "").toLowerCase();
   const a = (item.definition || "").toLowerCase();
   
-  const isAuthor = (strQ, strA) => strQ.includes("кому") || strA.includes("философ") || strA.includes("профессор") || strA.includes("судье") || strA.includes("лейбниц") || strA.includes("френд");
-  const isList = (strQ, strA) => strQ.includes("вид") || strQ.includes("част") || ((strA.match(/,/g) || []).length >= 1 && strA.length < 150);
-  const isFunction = (strQ, strA) => strQ.includes("функци") || strA.includes("функция");
+// --- УНИВЕРСАЛЬНАЯ СИСТЕМА ФИЛЬТРАЦИИ ОТВЕТОВ (Для любых предметов) ---
+  const termStr = item.term || "";
+  const defStr = item.definition || "";
 
-  const currentIsAuthor = isAuthor(q, a);
-  const currentIsList = isList(q, a);
-  const currentIsFunction = isFunction(q, a);
+  // 1. Ищем людей (включая твои старые маркеры + поиск инициалов типа "Г. Ласки")
+  const isPerson = (t, d) => /кому|философ|профессор|судье|лейбниц|френд|представител|автор/i.test(t + " " + d) || /[А-ЯЁA-Z]\.\s?[А-ЯЁA-Z]/.test(d);
+  
+  // 2. Ищем теории и концепции
+  const isTheory = (t, d) => /теори/i.test(t + " " + d);
+  
+  // 3. Ищем даты и цифры (идеально для истории и права)
+  const isDate = (t, d) => /\b\d{3,4}\b|год|век/i.test(t + " " + d);
+  
+  // 4. Ищем списки (виды, части, перечисления через запятую)
+  const isList = (t, d) => /вид|част|классификаци/i.test(t) || (d.split(',').length > 1 && d.length < 150);
+  
+  // 5. Оценка визуального объема (короткий ответ или длинный абзац)
+  const isShort = (d) => d.length <= 65;
 
+  const currentIsPerson = isPerson(termStr, defStr);
+  const currentIsTheory = isTheory(termStr, defStr);
+  const currentIsDate = isDate(termStr, defStr);
+  const currentIsList = isList(termStr, defStr);
+  const currentIsShort = isShort(defStr);
+
+  // tier1: Идеальное смысловое совпадение (Люди к людям, теории к теориям)
   let tier1 = basePool.filter(w => {
-      const wq = (w.term || "").toLowerCase(); const wa = (w.definition || "").toLowerCase();
-      if (currentIsAuthor) return isAuthor(wq, wa);
-      if (currentIsFunction) return isFunction(wq, wa);
-      if (currentIsList) return isList(wq, wa);
-      return !isAuthor(wq, wa) && !isList(wq, wa) && !isFunction(wq, wa);
+      const wt = w.term || ""; const wd = w.definition || "";
+      if (currentIsPerson) return isPerson(wt, wd);
+      if (currentIsTheory) return isTheory(wt, wd);
+      if (currentIsDate) return isDate(wt, wd);
+      if (currentIsList) return isList(wt, wd);
+      
+      // Если специфических маркеров нет, подбираем ответы похожей длины
+      return currentIsShort ? isShort(wd) : !isShort(wd);
   });
 
+  // tier2: Если идеальных совпадений не хватило, подбираем просто по визуальному размеру
   let tier2 = basePool.filter(w => {
-      const wq = (w.term || "").toLowerCase(); const wa = (w.definition || "").toLowerCase();
-      if (!currentIsAuthor && isAuthor(wq, wa)) return false; 
-      if (!currentIsList && isList(wq, wa)) return false;     
-      return true;
+      const wd = w.definition || "";
+      // Исключаем явное смешивание длинного и короткого
+      return currentIsShort ? isShort(wd) : !isShort(wd);
   });
-
+  
   let pool = tier1.length >= 3 ? tier1 : (tier2.length >= 3 ? tier2 : basePool);
   if (pool.length < 3) pool = State.words.filter(w => w.id !== item.id);
   
