@@ -1464,7 +1464,15 @@ document.getElementById("categoryFilter")?.addEventListener("change", (e) => {
   // Показываем кнопку удаления только если выбран конкретный предмет
   const delBtn = document.getElementById("deleteCategoryBtn");
   if (delBtn) {
-    delBtn.style.display = State.currentCategory === "ALL" ? "none" : "inline-block";
+    if (State.currentCategory === "ALL") {
+      delBtn.style.display = "none";
+      delBtn.style.setProperty("display", "none", "important"); // Жестко скрываем
+    } else {
+      delBtn.style.display = "inline-block";
+      delBtn.style.setProperty("display", "inline-block", "important"); // Жестко показываем
+    }
+  } else {
+    console.error("Кнопка deleteCategoryBtn не найдена в HTML!");
   }
   
   renderFlashcard();
@@ -1473,31 +1481,27 @@ document.getElementById("categoryFilter")?.addEventListener("change", (e) => {
 
 // --- 2. Логика удаления предмета ---
 document.getElementById("deleteCategoryBtn")?.addEventListener("click", () => {
-  if (State.currentCategory === "ALL") return; // Защита: нельзя удалить "Все предметы"
+  if (State.currentCategory === "ALL") return; 
   
-  const wordsToDelete = State.words.filter(w => w.category === State.currentCategory);
-  const count = wordsToDelete.length;
+  const count = State.words.filter(w => w.category === State.currentCategory).length;
   
   if (confirm(`⚠️ Вы уверены, что хотите удалить предмет «${State.currentCategory}» и все его карточки (${count} шт.)? Это действие нельзя отменить!`)) {
-    // Чистим слова и их прогресс из базы
     State.words = State.words.filter(w => {
       if (w.category === State.currentCategory) {
-        delete State.srs[w.id]; // Удаляем прогресс
-        return false; // Выкидываем слово из массива
+        delete State.srs[w.id]; 
+        return false; 
       }
-      return true; // Оставляем остальные
+      return true; 
     });
     
-    // Сохраняем чистую базу
     Storage.setWords(State.words);
     Storage.setSRS(State.srs);
     
-    // Возвращаем интерфейс в исходное состояние
     State.currentCategory = "ALL";
     document.getElementById("categoryFilter").value = "ALL";
-    document.getElementById("deleteCategoryBtn").style.display = "none";
+    const delBtn = document.getElementById("deleteCategoryBtn");
+    if(delBtn) delBtn.style.display = "none";
     
-    // Обновляем всё на экране
     updateCategoryUI();
     renderDictionary();
     renderFlashcard();
