@@ -1454,13 +1454,55 @@ if (speedSelect) {
   });
 }
 
+// --- 1. Управление переключением предмета ---
 document.getElementById("categoryFilter")?.addEventListener("change", (e) => {
   State.currentCategory = e.target.value;
   State.currentCardIndex = 0;
   State.lastAction = null;
   State.testSession = null;
+  
+  // Показываем кнопку удаления только если выбран конкретный предмет
+  const delBtn = document.getElementById("deleteCategoryBtn");
+  if (delBtn) {
+    delBtn.style.display = State.currentCategory === "ALL" ? "none" : "inline-block";
+  }
+  
   renderFlashcard();
   renderDictionary();
+});
+
+// --- 2. Логика удаления предмета ---
+document.getElementById("deleteCategoryBtn")?.addEventListener("click", () => {
+  if (State.currentCategory === "ALL") return; // Защита: нельзя удалить "Все предметы"
+  
+  const wordsToDelete = State.words.filter(w => w.category === State.currentCategory);
+  const count = wordsToDelete.length;
+  
+  if (confirm(`⚠️ Вы уверены, что хотите удалить предмет «${State.currentCategory}» и все его карточки (${count} шт.)? Это действие нельзя отменить!`)) {
+    // Чистим слова и их прогресс из базы
+    State.words = State.words.filter(w => {
+      if (w.category === State.currentCategory) {
+        delete State.srs[w.id]; // Удаляем прогресс
+        return false; // Выкидываем слово из массива
+      }
+      return true; // Оставляем остальные
+    });
+    
+    // Сохраняем чистую базу
+    Storage.setWords(State.words);
+    Storage.setSRS(State.srs);
+    
+    // Возвращаем интерфейс в исходное состояние
+    State.currentCategory = "ALL";
+    document.getElementById("categoryFilter").value = "ALL";
+    document.getElementById("deleteCategoryBtn").style.display = "none";
+    
+    // Обновляем всё на экране
+    updateCategoryUI();
+    renderDictionary();
+    renderFlashcard();
+    showToast("🗑️ Предмет успешно удален!");
+  }
 });
 
 document.getElementById("studyModeFilter")?.addEventListener("change", (e) => {
