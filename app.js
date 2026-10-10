@@ -1672,43 +1672,27 @@ recordBtn?.addEventListener("touchstart", (e) => { e.preventDefault(); startReco
 recordBtn?.addEventListener("touchend", (e) => { e.preventDefault(); stopRecording(); });
 recordBtn?.addEventListener("touchcancel", (e) => { e.preventDefault(); stopRecording(); });
 
-// --- Массовая генерация ---
+// --- Массовая генерация с окном предпросмотра ---
 window.generateBatchCards = async function() {
   const subjectInput = document.getElementById("ai-subject-name");
   const rawTextInput = document.getElementById("ai-raw-text");
   const batchBtn = document.getElementById("aiBatchBtn");
 
-  if (!subjectInput || !rawTextInput) {
-    showToast("❌ Ошибка интерфейса: поля ввода не найдены");
-    return;
-  }
+  if (!subjectInput || !rawTextInput) return;
 
   const category = subjectInput.value.trim();
   const rawText = rawTextInput.value.trim();
 
-  if (!category) {
-    showToast("⚠️ Укажите название предмета или темы!");
-    subjectInput.focus();
-    return;
-  }
-  if (!rawText) {
-    showToast("⚠️ Вставьте сырой текст или список вопросов!");
-    rawTextInput.focus();
-    return;
-  }
-
-  const keysStr = Storage.getApiKey();
-  if (!keysStr) {
-    showToast("❌ Укажите API Key в пуле ключей ниже!");
-    return;
-  }
+  if (!category) return showToast("⚠️ Укажите название предмета или темы!");
+  if (!rawText) return showToast("⚠️ Вставьте сырой текст!");
+  if (!Storage.getApiKey()) return showToast("❌ Укажите API Key!");
 
   const originalText = batchBtn.innerHTML;
-  batchBtn.innerHTML = "⏳ ИИ обрабатывает пачку...";
+  batchBtn.innerHTML = "⏳ ИИ обрабатывает текст...";
   batchBtn.disabled = true;
 
   try {
-    const prompt = `Ты профессиональный методист. Проанализируй сырой текст (предмет "${category}") и выдели все ключевые вопросы.
+    const prompt = `Ты профессиональный методист. Проанализируй сырой текст (предмет "${category}") и выдели все ключевые вопросы и термины.
 Верни ИСКЛЮЧИТЕЛЬНО валидный JSON-массив объектов: [{"term": "...", "transcription": "", "forms": [], "definition": "...", "example": "", "exampleTranslation": "", "category": "${category}"}]
 Текст:
 ${rawText}`;
@@ -1718,48 +1702,38 @@ ${rawText}`;
     });
 
     const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    if (!textResponse) throw new Error("ИИ вернул пустой ответ.");
-
     const jsonMatch = textResponse.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) throw new Error("Не удалось найти JSON-массив");
+    if (!jsonMatch) throw new Error("JSON не найден в ответе");
 
     const parsedArray = JSON.parse(jsonMatch[0]);
-    if (!Array.isArray(parsedArray) || parsedArray.length === 0) throw new Error("Пустой список карточек");
+    if (!Array.isArray(parsedArray) || parsedArray.length === 0) throw new Error("Пустой список");
 
-    let addedCount = 0;
-    parsedArray.forEach((item, index) => {
-      if (item.term && item.definition) {
-        const newCard = {
-          id: "w-" + Date.now() + "-" + index,
-          term: item.term.trim(),
-          transcription: item.transcription || "",
-          forms: Array.isArray(item.forms) ? item.forms : [],
-          definition: item.definition.trim(),
-          example: item.example || "",
-          exampleTranslation: item.exampleTranslation || "",
-          category: category
-        };
+    // Записываем во временный массив вместо прямого сохранения
+    State.pendingBatch = parsedArray.map((item, index) => ({
+      id: "w-temp-" + Date.now() + "-" + index,
+      term: item.term || "",
+      definition: item.definition || "",
+      category: category
+    })).filter(i => i.term && i.definition);
 
-        const exists = State.words.some(w => w.term.toLowerCase() === newCard.term.toLowerCase() && w.category.toLowerCase() === category.toLowerCase());
-        if (!exists) {
-          State.words.unshift(newCard);
-          addedCount++;
-        }
-      }
-    });
+    // Рендерим карточки в модальное окно
+    const reviewBody = document.getElementById("reviewBody");
+    reviewBody.innerHTML = State.pendingBatch.map((item, i) => `
+      <div class="review-card" id="revCard-${i}">
+        <button type="button" class="review-card-delete" onclick="removePendingCard(${i})">Удалить</button>
+        <label style="font-size: 0.8rem; color: var(--text-muted);">Вопрос / Термин</label>
+        <input type="text" class="review-input rev-term" data-index="${i}" value="${escapeHtml(item.term)}">
+        <label style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; display: block;">Ответ / Определение</label>
+        <textarea class="review-input rev-def" data-index="${i}" rows="3">${escapeHtml(item.definition)}</textarea>
+      </div>
+    `).join("");
 
-    Storage.setWords(State.words);
-    State.currentCategory = "ALL";
-    document.getElementById("categoryFilter").value = "ALL";
-    
-    updateCategoryUI();
-    renderDictionary();
-    renderFlashcard();
-    
-    rawTextInput.value = "";
-    subjectInput.value = "";
-    showToast(`✨ Успешно создано карточек: ${addedCount}!`);
-    switchTab("cardsView");
+    // Показываем окно
+    document.getElementById("reviewOverlay").classList.add("show");
+    document.getElementById("reviewModal").classList.add("show");
+
+    rawTextInput.value = ""; // Очищаем поле ввода текста
+    showToast(`✨ ИИ сгенерировал ${State.pendingBatch.length} карточек. Проверьте их!`);
 
   } catch (err) {
     if (err.message.startsWith("QUOTA_EXHAUSTED")) {
@@ -1772,6 +1746,68 @@ ${rawText}`;
     batchBtn.innerHTML = originalText;
     batchBtn.disabled = false;
   }
+};
+
+// --- Функции управления окном проверки ---
+window.closeReviewModal = function() {
+  document.getElementById("reviewOverlay").classList.remove("show");
+  document.getElementById("reviewModal").classList.remove("show");
+  State.pendingBatch = null;
+};
+
+window.removePendingCard = function(index) {
+  const card = document.getElementById(`revCard-${index}`);
+  if (card) card.style.display = "none"; // Прячем карточку, чтобы она не сохранилась
+};
+
+window.saveReviewedBatch = function() {
+  const cards = document.querySelectorAll(".review-card");
+  let addedCount = 0;
+
+  cards.forEach(card => {
+    if (card.style.display === "none") return; // Пропускаем удаленные
+
+    const termInput = card.querySelector(".rev-term");
+    const defInput = card.querySelector(".rev-def");
+    if (!termInput || !defInput) return;
+
+    const index = termInput.dataset.index;
+    const baseItem = State.pendingBatch[index];
+    const newTerm = termInput.value.trim();
+    const newDef = defInput.value.trim();
+
+    if (newTerm && newDef) {
+      // Проверка на дубликаты
+      const exists = State.words.some(w => w.term.toLowerCase() === newTerm.toLowerCase() && w.category.toLowerCase() === baseItem.category.toLowerCase());
+      if (!exists) {
+        baseItem.term = newTerm;
+        baseItem.definition = newDef;
+        baseItem.id = "w-" + Date.now() + "-" + addedCount;
+        baseItem.transcription = ""; 
+        baseItem.forms = [];
+        baseItem.example = "";
+        baseItem.exampleTranslation = "";
+        
+        State.words.unshift(baseItem); // Закидываем в общую базу
+        addedCount++;
+      }
+    }
+  });
+
+  if (addedCount > 0) {
+    Storage.setWords(State.words);
+    State.currentCategory = "ALL";
+    document.getElementById("categoryFilter").value = "ALL";
+    updateCategoryUI();
+    renderDictionary();
+    renderFlashcard();
+    switchTab("cardsView");
+    showToast(`✅ Сохранено новых карточек: ${addedCount}`);
+  } else {
+    showToast(`⚠️ Ничего не добавлено (возможно, это дубликаты)`);
+  }
+
+  closeReviewModal();
 };
 
 // --- Облачная Синхронизация (GitHub Gists) ---

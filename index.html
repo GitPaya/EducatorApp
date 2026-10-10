@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b132b">
-  <link rel="stylesheet" href="style.css?v=2"> 
+  <link rel="stylesheet" href="style.css?v=3"> 
 </head>
 <body>
   <header>
@@ -227,8 +227,23 @@
     </div>
     <button class="btn-submit btn-full-width" id="wpAddBtn" style="display:none;">Добавить в словарь</button>
   </div>
+<!-- МОДАЛКА ПРОВЕРКИ МАССОВОЙ ГЕНЕРАЦИИ -->
+  <div class="bs-overlay" id="reviewOverlay"></div>
+  <div class="bottom-sheet" id="reviewModal" style="max-height: 90vh; padding: 0; z-index: 3000;">
+    <div class="bs-header" style="padding: 20px 20px 10px 20px; border-bottom: 1px solid var(--card-border);">
+      <h3 style="color: #a855f7;">✨ Проверка генерации</h3>
+      <button class="bs-close" onclick="closeReviewModal()">✕</button>
+    </div>
+    <div id="reviewBody" style="padding: 16px; overflow-y: auto; max-height: calc(90vh - 140px); display: flex; flex-direction: column; gap: 12px;">
+      <!-- Сюда скрипт вставит сгенерированные карточки -->
+    </div>
+    <div style="padding: 16px 20px; border-top: 1px solid var(--card-border); display: flex; gap: 12px; background: var(--card-bg);">
+      <button class="btn-cancel" style="flex: 1;" onclick="closeReviewModal()">Отменить</button>
+      <button class="btn-submit" style="flex: 2; background: linear-gradient(135deg, #6366f1, #a855f7);" onclick="saveReviewedBatch()">💾 Сохранить выбранные</button>
+    </div>
+  </div>
 
-  <script src="database.js?v2=stable"></script>
-  <script src="app.js?v2=stable"></script>
+  <script src="database.js?v3=stable"></script>
+  <script src="app.js?v3=stable"></script>
 </body>
 </html>

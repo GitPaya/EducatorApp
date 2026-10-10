@@ -144,3 +144,34 @@ th { background-color: var(--card-bg); color: var(--accent); font-weight: 600; }
   50% { box-shadow: 0 0 30px rgba(239, 71, 111, 0.9); }
   100% { box-shadow: 0 0 15px rgba(239, 71, 111, 0.6); }
 }
+/* --- СТИЛИ ДЛЯ ПРОВЕРКИ ГЕНЕРАЦИИ ИИ --- */
+.review-card {
+  background: rgba(11, 19, 43, 0.4);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 16px;
+  position: relative;
+}
+.review-card-delete {
+  position: absolute;
+  top: 12px; right: 12px;
+  background: rgba(239, 71, 111, 0.15);
+  border: 1px solid var(--danger);
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.review-input {
+  width: 100%;
+  background: var(--bg-color);
+  border: 1px solid var(--card-border);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.review-input:focus { border-color: #a855f7; outline: none; }
