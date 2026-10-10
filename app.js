@@ -2036,29 +2036,31 @@ window.toggleAccordion = function(header) {
   const card = header.parentElement;
   card.classList.toggle('active');
 };
-// --- TINDER СВАЙПЫ: ЗНАЮ / НЕ ЗНАЮ ---
-document.addEventListener("DOMContentLoaded", () => {
+// --- TINDER СВАЙПЫ: ЗНАЮ / НЕ ЗНАЮ (АВТОЗАПУСК) ---
+(function initSwipes() {
   const card = document.getElementById("flashcard");
   if (!card) return;
 
-  // Добавляем подсказки под карточку программно
-  const hintsHtml = document.createElement("div");
-  hintsHtml.className = "swipe-hints";
-  hintsHtml.id = "swipeHints";
-  hintsHtml.innerHTML = `<span class="hint-left">👈 Не знаю</span><span class="hint-right">Знаю 👉</span>`;
-  card.parentNode.insertBefore(hintsHtml, card.nextSibling);
+  // Добавляем подсказки под карточку
+  let hintsHtml = document.getElementById("swipeHints");
+  if (!hintsHtml) {
+    hintsHtml = document.createElement("div");
+    hintsHtml.className = "swipe-hints";
+    hintsHtml.id = "swipeHints";
+    hintsHtml.innerHTML = `<span class="hint-left">👈 Не знаю</span><span class="hint-right">Знаю 👉</span>`;
+    card.parentNode.insertBefore(hintsHtml, card.nextSibling);
+  }
 
   let startX = 0;
   let currentX = 0;
   let isDragging = false;
-  const swipeThreshold = 90; // Порог срабатывания свайпа (пиксели)
+  const swipeThreshold = 90;
 
   card.addEventListener("touchstart", (e) => {
-    if (!card.classList.contains("flipped")) return; // Блокируем свайп, пока не прочитал ответ
-    
+    if (!card.classList.contains("flipped")) return; 
     startX = e.touches[0].clientX;
     isDragging = true;
-    card.style.transition = "none"; // Отключаем плавность для мгновенного следования за пальцем
+    card.style.transition = "none"; 
   }, { passive: true });
 
   card.addEventListener("touchmove", (e) => {
@@ -2066,16 +2068,13 @@ document.addEventListener("DOMContentLoaded", () => {
     currentX = e.touches[0].clientX;
     const diffX = currentX - startX;
     
-    // Вращение и смещение карточки за пальцем
     card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
 
-    // --- МАГИЯ ПОДСВЕТКИ ---
+    // Подсветка
     if (diffX > 20) {
-      // Тянем вправо (Знаю) -> Зеленый неон
       card.style.boxShadow = "0 0 30px rgba(46, 204, 113, 0.4)";
       card.style.borderColor = "#2ecc71";
     } else if (diffX < -20) {
-      // Тянем влево (Не знаю) -> Красный неон
       card.style.boxShadow = "0 0 30px rgba(231, 76, 60, 0.4)";
       card.style.borderColor = "#e74c3c";
     } else {
@@ -2093,30 +2092,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (Math.abs(diffX) > swipeThreshold) {
       if (diffX > 0) {
-        // --- СВАЙП ВПРАВО (ЗНАЮ) ---
-        if (navigator.vibrate) navigator.vibrate(50); // Успешная вибрация
+        // ВПРАВО (Знаю)
+        if (navigator.vibrate) navigator.vibrate(50);
         card.style.transform = "translateX(150vw) rotate(30deg)";
         card.style.opacity = "0";
-        
         setTimeout(() => {
           const btns = document.querySelectorAll('.srs-btn');
-          if (btns.length > 2) btns[2].click(); // Имитируем клик по "Хорошо"
+          if (btns.length > 2) btns[2].click();
           resetCardStyle();
         }, 300);
       } else {
-        // --- СВАЙП ВЛЕВО (НЕ ЗНАЮ) ---
-        if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Вибрация ошибки
+        // ВЛЕВО (Не знаю)
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
         card.style.transform = "translateX(-150vw) rotate(-30deg)";
         card.style.opacity = "0";
-        
         setTimeout(() => {
           const btns = document.querySelectorAll('.srs-btn');
-          if (btns.length > 0) btns[0].click(); // Имитируем клик по "Снова"
+          if (btns.length > 0) btns[0].click();
           resetCardStyle();
         }, 300);
       }
     } else {
-      // Если не дотянул - возвращаем карточку в центр
       resetCardStyle();
     }
   });
@@ -2126,13 +2122,12 @@ document.addEventListener("DOMContentLoaded", () => {
     card.style.opacity = "1";
     card.style.boxShadow = "";
     card.style.borderColor = "";
-    document.getElementById("swipeHints").classList.remove("show"); // Прячем подсказки при смене слова
+    hintsHtml.classList.remove("show");
   }
   
-  // Показываем подсказки, когда карточка перевернута
   card.addEventListener("click", () => {
     if (card.classList.contains("flipped")) {
-      document.getElementById("swipeHints").classList.add("show");
+      hintsHtml.classList.add("show");
     }
   });
-});
+})();
