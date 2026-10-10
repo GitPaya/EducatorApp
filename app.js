@@ -1710,17 +1710,27 @@ ${rawText}`;
 document.addEventListener("DOMContentLoaded", () => {
   const tokenInput = document.getElementById("sync-token");
   const gistInput = document.getElementById("sync-gist-id");
-  
+  const toggleSyncTokenBtn = document.getElementById("toggleSyncTokenBtn");
   if (tokenInput) {
     tokenInput.value = localStorage.getItem("ghToken") || "";
     tokenInput.addEventListener("input", () => localStorage.setItem("ghToken", tokenInput.value.trim()));
   }
-  
   if (gistInput) {
     gistInput.value = localStorage.getItem("gistId") || "";
     gistInput.addEventListener("input", () => localStorage.setItem("gistId", gistInput.value.trim()));
   }
-  
+  // Логика для глазка
+  if (toggleSyncTokenBtn && tokenInput) {
+    toggleSyncTokenBtn.addEventListener("click", () => {
+      if (tokenInput.type === "password") {
+        tokenInput.type = "text";
+        toggleSyncTokenBtn.textContent = "🙈";
+      } else {
+        tokenInput.type = "password";
+        toggleSyncTokenBtn.textContent = "👁️";
+      }
+    });
+  }
   setTimeout(checkCloudSync, 2000);
 });
 

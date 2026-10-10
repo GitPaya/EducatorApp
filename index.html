@@ -182,7 +182,10 @@
           <div class="accordion-body">
             <div style="margin-bottom: 12px;">
               <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Секретный токен GitHub</label>
-              <input type="password" id="sync-token" class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="password" id="sync-token" class="app-input" style="flex: 1; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+                <button type="button" id="toggleSyncTokenBtn" class="tab-btn-action" style="background: transparent; border: 1px solid var(--card-border); color: var(--text-muted); border-radius: 8px; cursor: pointer; padding: 0 14px; height: 42px;" title="Показать/Скрыть">👁️</button>
+              </div>
             </div>
             <div style="margin-bottom: 12px;">
               <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">ID Базы (Gist ID)</label>
