@@ -175,3 +175,33 @@ th { background-color: var(--card-bg); color: var(--accent); font-weight: 600; }
   font-size: 0.95rem;
 }
 .review-input:focus { border-color: #a855f7; outline: none; }
+/* --- TINDER СВАЙПЫ --- */
+/* 1. Полностью убиваем видимость старых 4-х кнопок */
+.srs-btn {
+  display: none !important; 
+}
+
+/* 2. Запрещаем браузеру перехватывать жесты на карточке */
+#flashcard {
+  touch-action: pan-y !important; /* Разрешает только скролл вниз, вправо-влево отдаем нашему коду */
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+}
+
+/* 3. Контейнер для подсказок под карточкой */
+.swipe-hints {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 400px;
+  margin: 15px auto 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  pointer-events: none;
+  opacity: 0; /* Скрыты до переворота карточки */
+  transition: opacity 0.3s ease;
+}
+.swipe-hints.show { opacity: 1; }
+.hint-left { color: #e74c3c; text-shadow: 0 0 10px rgba(231,76,60,0.5); }
+.hint-right { color: #2ecc71; text-shadow: 0 0 10px rgba(46,204,113,0.5); }

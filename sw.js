@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kognitix-v22-cache'; // Подняли версию кэша!
+const CACHE_NAME = 'kognitix-v23-cache'; // Подняли версию кэша!
 const assetsToCache = [
   './',
   './index.html',
