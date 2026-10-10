@@ -207,6 +207,27 @@ function addKeyRow(value = "") {
   input.value = value;
   input.className = 'api-key-input';
 
+  // --- НОВАЯ КНОПКА КОПИРОВАНИЯ ---
+  const copyBtn = document.createElement('button');
+  copyBtn.type = 'button';
+  copyBtn.className = 'tab-btn-action';
+  copyBtn.style.background = 'transparent';
+  copyBtn.style.padding = '0 10px';
+  copyBtn.style.borderRadius = '4px';
+  copyBtn.style.cursor = 'pointer';
+  copyBtn.style.border = '1px solid var(--card-border)';
+  copyBtn.style.color = 'var(--text-muted)';
+  copyBtn.style.height = '38px';
+  copyBtn.textContent = '📋';
+  copyBtn.title = 'Копировать';
+  
+  copyBtn.addEventListener('click', () => {
+    if (input.value) {
+      navigator.clipboard.writeText(input.value);
+      showToast("📋 Ключ скопирован!");
+    }
+  });
+
   const eyeBtn = document.createElement('button');
   eyeBtn.type = 'button';
   eyeBtn.className = 'tab-btn-action';
@@ -252,6 +273,7 @@ function addKeyRow(value = "") {
   });
 
   row.appendChild(input);
+  row.appendChild(copyBtn); // Кнопка копирования добавлена в ряд
   row.appendChild(eyeBtn);
   row.appendChild(delBtn);
   apiKeysContainer.appendChild(row);
@@ -1711,15 +1733,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const tokenInput = document.getElementById("sync-token");
   const gistInput = document.getElementById("sync-gist-id");
   const toggleSyncTokenBtn = document.getElementById("toggleSyncTokenBtn");
+  const copySyncTokenBtn = document.getElementById("copySyncTokenBtn"); // <-- Кнопка копирования
+  
   if (tokenInput) {
     tokenInput.value = localStorage.getItem("ghToken") || "";
     tokenInput.addEventListener("input", () => localStorage.setItem("ghToken", tokenInput.value.trim()));
   }
+  
   if (gistInput) {
     gistInput.value = localStorage.getItem("gistId") || "";
     gistInput.addEventListener("input", () => localStorage.setItem("gistId", gistInput.value.trim()));
   }
-  // Логика для глазка
+
+  // Логика кнопки "Глазок" (Показать/Скрыть)
   if (toggleSyncTokenBtn && tokenInput) {
     toggleSyncTokenBtn.addEventListener("click", () => {
       if (tokenInput.type === "password") {
@@ -1731,6 +1757,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Логика кнопки "Копировать"
+  if (copySyncTokenBtn && tokenInput) {
+    copySyncTokenBtn.addEventListener("click", () => {
+      if (tokenInput.value) {
+        navigator.clipboard.writeText(tokenInput.value);
+        showToast("📋 Токен скопирован!");
+      }
+    });
+  }
+  
   setTimeout(checkCloudSync, 2000);
 });
 
