@@ -2036,88 +2036,103 @@ window.toggleAccordion = function(header) {
   const card = header.parentElement;
   card.classList.toggle('active');
 };
-// --- ГЛОБАЛЬНЫЙ ПЕРЕХВАТЧИК СВАЙПОВ (TINDER-STYLE) ---
-window.startX = 0;
-window.currentX = 0;
-window.isDragging = false;
-window.swipeCard = null;
+// --- УНИВЕРСАЛЬНЫЕ СВАЙПЫ (МЫШЬ + ПАЛЕЦ, БЕЗ ОБЯЗАТЕЛЬНОГО ПЕРЕВОРОТА) ---
+(function initUniversalSwipes() {
+  window.startX = 0;
+  window.currentX = 0;
+  window.isDragging = false;
+  window.swipeCard = null;
 
-document.addEventListener("touchstart", (e) => {
-  // Ищем, попал ли палец по карточке
-  const card = e.target.closest("#flashcard");
-  // Если не попал, или карточка еще не перевернута - игнорим
-  if (!card || !card.classList.contains("flipped")) return; 
-  
-  window.swipeCard = card;
-  window.startX = e.touches[0].clientX;
-  window.isDragging = true;
-  card.style.transition = "none"; // Отключаем плавность
-}, { passive: true });
+  document.addEventListener("pointerdown", (e) => {
+    const card = e.target.closest("#flashcard");
+    // Если кликнули мимо карточки - игнорим
+    if (!card) return; 
+    
+    window.swipeCard = card;
+    window.startX = e.clientX;
+    window.isDragging = true;
+    card.style.transition = "none"; 
+    
+    // Захватываем курсор/палец, чтобы жест не срывался
+    if (e.pointerId) {
+      card.setPointerCapture(e.pointerId);
+    }
+  });
 
-document.addEventListener("touchmove", (e) => {
-  if (!window.isDragging || !window.swipeCard) return;
-  
-  window.currentX = e.touches[0].clientX;
-  const diffX = window.currentX - window.startX;
-  const card = window.swipeCard;
-  
-  // Двигаем и вращаем
-  card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+  document.addEventListener("pointermove", (e) => {
+    if (!window.isDragging || !window.swipeCard) return;
+    
+    window.currentX = e.clientX;
+    const diffX = window.currentX - window.startX;
+    const card = window.swipeCard;
+    
+    // Двигаем и вращаем карточку
+    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
 
-  // Неоновая подсветка
-  if (diffX > 20) {
-    card.style.boxShadow = "0 0 30px rgba(46, 204, 113, 0.4)";
-    card.style.borderColor = "#2ecc71";
-  } else if (diffX < -20) {
-    card.style.boxShadow = "0 0 30px rgba(231, 76, 60, 0.4)";
-    card.style.borderColor = "#e74c3c";
-  } else {
+    // Неоновая подсветка (Зеленый - вправо, Красный - влево)
+    if (diffX > 20) {
+      card.style.boxShadow = "0 0 30px rgba(46, 204, 113, 0.6)";
+      card.style.borderColor = "#2ecc71";
+    } else if (diffX < -20) {
+      card.style.boxShadow = "0 0 30px rgba(231, 76, 60, 0.6)";
+      card.style.borderColor = "#e74c3c";
+    } else {
+      card.style.boxShadow = "";
+      card.style.borderColor = "";
+    }
+  });
+
+  const stopDrag = (e) => {
+    if (!window.isDragging || !window.swipeCard) return;
+    window.isDragging = false;
+    
+    const card = window.swipeCard;
+    const diffX = window.currentX - window.startX;
+    const swipeThreshold = 90; // Расстояние для срабатывания
+
+    card.style.transition = "transform 0.4s ease-out, opacity 0.4s ease-out, box-shadow 0.4s, border-color 0.4s";
+    if (e.pointerId) {
+      card.releasePointerCapture(e.pointerId);
+    }
+
+    if (Math.abs(diffX) > swipeThreshold) {
+      if (diffX > 0) {
+        // --- СВАЙП ВПРАВО (ЗНАЮ) ---
+        if (navigator.vibrate) navigator.vibrate(50);
+        card.style.transform = "translateX(150vw) rotate(30deg)";
+        card.style.opacity = "0";
+        
+        setTimeout(() => {
+          const btns = document.querySelectorAll('.srs-btn');
+          if (btns.length > 2) btns[2].click(); // Виртуальный клик по кнопке "Хорошо"
+          resetSwipe(card);
+        }, 300);
+      } else {
+        // --- СВАЙП ВЛЕВО (НЕ ЗНАЮ) ---
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+        card.style.transform = "translateX(-150vw) rotate(-30deg)";
+        card.style.opacity = "0";
+        
+        setTimeout(() => {
+          const btns = document.querySelectorAll('.srs-btn');
+          if (btns.length > 0) btns[0].click(); // Виртуальный клик по кнопке "Снова"
+          resetSwipe(card);
+        }, 300);
+      }
+    } else {
+      // Если потянул слабо - возвращаем карточку в центр
+      resetSwipe(card);
+    }
+    window.swipeCard = null;
+  };
+
+  document.addEventListener("pointerup", stopDrag);
+  document.addEventListener("pointercancel", stopDrag);
+
+  function resetSwipe(card) {
+    card.style.transform = "translateX(0) rotate(0)";
+    card.style.opacity = "1";
     card.style.boxShadow = "";
     card.style.borderColor = "";
   }
-}, { passive: true });
-
-document.addEventListener("touchend", () => {
-  if (!window.isDragging || !window.swipeCard) return;
-  window.isDragging = false;
-  
-  const card = window.swipeCard;
-  const diffX = window.currentX - window.startX;
-  const swipeThreshold = 90;
-
-  card.style.transition = "transform 0.4s ease-out, opacity 0.4s ease-out, box-shadow 0.4s, border-color 0.4s";
-
-  if (Math.abs(diffX) > swipeThreshold) {
-    if (diffX > 0) {
-      // --- ВПРАВО (Знаю) ---
-      if (navigator.vibrate) navigator.vibrate(50);
-      card.style.transform = "translateX(150vw) rotate(30deg)";
-      card.style.opacity = "0";
-      setTimeout(() => {
-        const btns = document.querySelectorAll('.srs-btn');
-        if (btns.length > 2) btns[2].click(); // Клик по "Хорошо"
-        resetSwipe(card);
-      }, 300);
-    } else {
-      // --- ВЛЕВО (Не знаю) ---
-      if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-      card.style.transform = "translateX(-150vw) rotate(-30deg)";
-      card.style.opacity = "0";
-      setTimeout(() => {
-        const btns = document.querySelectorAll('.srs-btn');
-        if (btns.length > 0) btns[0].click(); // Клик по "Снова"
-        resetSwipe(card);
-      }, 300);
-    }
-  } else {
-    resetSwipe(card);
-  }
-  window.swipeCard = null;
-});
-
-function resetSwipe(card) {
-  card.style.transform = "translateX(0) rotate(0)";
-  card.style.opacity = "1";
-  card.style.boxShadow = "";
-  card.style.borderColor = "";
-}
+})();
