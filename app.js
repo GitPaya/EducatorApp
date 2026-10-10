@@ -2027,15 +2027,6 @@ function showCloudUpdateToast() {
   document.getElementById('closeCloudSyncBtn').addEventListener('click', () => toast.remove());
 }
 
-// Запуск инициализации при загрузке
-updateCategoryUI();
-renderFlashcard();
-renderDictionary();
-
-window.toggleAccordion = function(header) {
-  const card = header.parentElement;
-  card.classList.toggle('active');
-};
 // --- УНИВЕРСАЛЬНЫЕ СВАЙПЫ (МЫШЬ + ПАЛЕЦ, БЕЗ ОБЯЗАТЕЛЬНОГО ПЕРЕВОРОТА) ---
 (function initUniversalSwipes() {
   window.startX = 0;
@@ -2136,3 +2127,13 @@ window.toggleAccordion = function(header) {
     card.style.borderColor = "";
   }
 })();
+
+// Запуск инициализации при загрузке
+updateCategoryUI();
+renderFlashcard();
+renderDictionary();
+
+window.toggleAccordion = function(header) {
+  const card = header.parentElement;
+  card.classList.toggle('active');
+};
