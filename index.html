@@ -6,17 +6,15 @@
   <title>Kognitix</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b132b">
-
-  <link rel="stylesheet" href="style.css?v=2"> 
+  <link rel="stylesheet" href="style.css?v=stable"> 
 </head>
 <body>
-  <header class="kognitix-header">
-    <div class="header-main-row">
-      <h1 class="brand-logo">Kognitix</h1>
-      <div class="header-right-tools">
-        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Сменить тему">🌙</button>
+  <header>
+    <div class="top-bar">
+      <div class="brand-block">
+        <div class="brand">Kognitix</div>
         <div class="audio-header-controls">
-          <button type="button" class="toggle-tts-btn active" id="ttsAutoToggle">🔊 Авто</button>
+          <button type="button" class="toggle-tts-btn active" id="ttsAutoToggle">🔊 Авто: Вкл</button>
           <select class="speed-select" id="ttsSpeedSelect" title="Скорость озвучки">
             <option value="0.5">0.5x</option>
             <option value="0.75">0.75x</option>
@@ -26,31 +24,39 @@
           </select>
         </div>
       </div>
-    </div>
-
-    <div class="filters-minimal-row">
-      <select id="categoryFilter" class="minimal-select" title="Предмет">
-        <option value="ALL">📂 Все предметы</option>
-      </select>
-      <select id="studyModeFilter" class="minimal-select" title="Режим">
-        <option value="DUE">🔥 К повторению</option>
-        <option value="ALL">📚 Все слова</option>
-      </select>
-      <select id="flashcardModeSelect" class="minimal-select" title="Вид">
-        <option value="CLASSIC">🎴 Карточки</option>
-        <option value="TEST">📝 Тесты</option>
-      </select>
-      <div id="testOrderGroup" style="display: none;">
-        <select id="testOrderSelect" class="minimal-select" title="Порядок">
-          <option value="RANDOM">🔀 Вразброс</option>
-          <option value="SEQUENTIAL">🔢 По номерам</option>
-        </select>
+      <div class="controls-group">
+        <div class="filter-group">
+          <label for="categoryFilter">Предмет:</label>
+          <select id="categoryFilter">
+            <option value="ALL">Все предметы</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="studyModeFilter">Режим:</label>
+          <select id="studyModeFilter">
+            <option value="DUE">К повторению</option>
+            <option value="ALL">Все слова</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="flashcardModeSelect">Вид:</label>
+          <select id="flashcardModeSelect">
+            <option value="CLASSIC">Карточки</option>
+            <option value="TEST">Тесты</option>
+          </select>
+        </div>
+        <div class="filter-group" id="testOrderGroup" style="display: none;">
+          <label for="testOrderSelect">Порядок:</label>
+          <select id="testOrderSelect">
+            <option value="RANDOM">Вразброс</option>
+            <option value="SEQUENTIAL">По номерам</option>
+          </select>
+        </div>
       </div>
     </div>
   </header>
 
-<!-- УНИВЕРСАЛЬНЫЙ ПЛАВАЮЩИЙ DOCK (Для ПК и Телефона) -->
-<nav class="floating-dock">
+  <nav class="floating-dock">
     <button class="tab-btn active" data-tab="cardsView">🎴 Изучение</button>
     <button class="tab-btn" data-tab="dictionaryView">📖 Словарь</button>
     <button class="tab-btn" data-tab="addView" id="navAddBtn">➕ Добавить</button>
@@ -72,44 +78,35 @@
 
     <section id="dictionaryView" class="view">
       <div class="dict-toolbar">
-      <input type="text" id="dictSearch" placeholder="🔍 Поиск слова или перевода..." style="flex: 1; min-width: 200px;">
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <!-- Скрытая кнопка отката ИИ (скрипт ее ищет!) -->
-        <button type="button" class="action-btn" id="undoDictUpdateBtn" style="display:none; background: rgba(239, 71, 111, 0.2); padding: 8px 16px; border: 1px solid var(--danger); border-radius: 8px; color: #fff;">↩ Откат ИИ</button>
-        
-        <!-- Кнопка скачивания App (скрипт ищет exportHtmlBtn) -->
-        <button type="button" class="action-btn" id="exportHtmlBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📱 Скачать App</button>
-        
-        <!-- Кнопка экспорта (скрипт ищет exportBtn) -->
-        <button type="button" class="action-btn" id="exportBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📤 Экспорт</button>
-        
-        <!-- Кнопка импорта (скрипт ищет importToggleBtn) -->
-        <button type="button" class="action-btn" id="importToggleBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📥 Импорт</button>
+        <input type="text" id="dictSearch" placeholder="🔍 Поиск слова или перевода..." style="flex: 1; min-width: 200px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="action-btn" id="undoDictUpdateBtn" style="display:none; background: rgba(239, 71, 111, 0.2); border: 1px solid var(--danger); border-radius: 8px; padding: 8px 16px; color: #fff;">↩ Откат ИИ</button>
+          <button type="button" class="action-btn" id="exportHtmlBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📱 Скачать App</button>
+          <button type="button" class="action-btn" id="exportBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📤 Экспорт</button>
+          <button type="button" class="action-btn" id="importToggleBtn" style="background: rgba(11, 19, 43, 0.6); padding: 8px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">📥 Импорт</button>
+        </div>
       </div>
-    </div>
-    
-    <!-- Текстовое поле для импорта (скрипт его ищет!) -->
-    <textarea id="importTextarea" style="display:none; width: 100%; height: 120px; margin-bottom: 16px; font-family: monospace; font-size: 0.8rem; background: var(--card-bg); color: var(--text-main); padding: 12px; border: 1px solid var(--accent); border-radius: 8px; margin-top: 12px;" placeholder="Вставьте JSON сюда и нажмите 'Сохранить импорт'..."></textarea>
+      <textarea id="importTextarea" style="display:none; width: 100%; height: 120px; margin-bottom: 16px; font-family: monospace; font-size: 0.8rem; background: var(--card-bg); color: var(--text-main); padding: 12px; border: 1px solid var(--accent); border-radius: 8px;"></textarea>
+      
+      <div class="table-wrapper">
         <table>
           <thead>
             <tr>
               <th>Термин</th>
               <th>Определение</th>
-              <!-- Добавили класс hide-on-mobile, чтобы скрыть на телефоне -->
-              <th class="hide-on-mobile">Предмет</th>
-              <th class="hide-on-mobile">Повтор</th>
+              <th>Предмет</th>
+              <th>Повторение</th>
               <th>Действия</th>
             </tr>
           </thead>
           <tbody id="dictionaryTbody"></tbody>
         </table>
+      </div>
+    </section>
 
-    <!-- Вкладка "+ Добавить" с аккордеонами -->
-<!-- Вкладка "+ Добавить" с аккордеонами -->
     <section id="addView" class="view">
       <div class="add-container" style="padding: 16px; max-width: 760px; margin: 0 auto; box-sizing: border-box;">
         
-        <!-- Блок 1: Массовая генерация через ИИ -->
         <div class="accordion-card active">
           <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🤖 Массовая генерация карточек и тестов</button>
           <div class="accordion-body">
@@ -118,14 +115,13 @@
               <input type="text" id="ai-subject-name" placeholder="Например: Римское право (Тема 2)" class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
             </div>
             <div style="margin-bottom: 12px;">
-              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Сырой текст, вопросы или список тезисов (от 1 до 100+)</label>
-              <textarea id="ai-raw-text" placeholder="Вставь сюда текст лекции, вопросы из методички или список терминов..." class="app-textarea" rows="6" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
+              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Сырой текст, вопросы или список тезисов</label>
+              <textarea id="ai-raw-text" placeholder="Вставь сюда текст лекции, вопросы из методички..." class="app-textarea" rows="6" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; resize: vertical;"></textarea>
             </div>
             <button type="button" id="aiBatchBtn" onclick="generateBatchCards()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 15px;">✨ Сгенерировать пачку через ИИ</button>
           </div>
         </div>
 
-        <!-- Блок 2: Голосовое ИИ-распознавание -->
         <div class="accordion-card">
           <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🎤 Голосовое ИИ-распознавание</button>
           <div class="accordion-body">
@@ -136,7 +132,6 @@
           </div>
         </div>
 
-        <!-- Блок 3: Ручное добавление термина -->
         <div class="accordion-card">
           <button type="button" class="accordion-header" onclick="toggleAccordion(this)">✍️ Ручное добавление термина</button>
           <div class="accordion-body">
@@ -146,16 +141,16 @@
                 <label for="formTerm" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Термин / Концепт</label>
                 <div style="display: flex; gap: 8px; align-items: center;">
                   <input type="text" id="formTerm" required style="flex: 1; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
-                  <button type="button" class="tab-btn-action" id="aiFillBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; cursor: pointer; padding: 0 14px; height: 42px; white-space: nowrap; transition: all 0.2s;" title="Заполнить карточку с помощью ИИ">✨ ИИ</button>
+                  <button type="button" class="tab-btn-action" id="aiFillBtn" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; cursor: pointer; padding: 0 14px; height: 42px; white-space: nowrap;">✨ ИИ</button>
                 </div>
               </div>
               <div class="form-group" style="margin: 0;">
                 <label for="formTranscription" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Транскрипция</label>
-                <input type="text" id="formTranscription" placeholder="напр: [mʌst hæv]" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+                <input type="text" id="formTranscription" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
               </div>
               <div class="form-group" style="margin: 0;">
                 <label for="formForms" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Формы слова</label>
-                <input type="text" id="formForms" placeholder="напр: We [wi] - мы" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+                <input type="text" id="formForms" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
               </div>
               <div class="form-group" style="margin: 0;">
                 <label for="formDefinition" style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Определение / Перевод</label>
@@ -182,17 +177,16 @@
           </div>
         </div>
 
-        <!-- Блок 4: Облачная синхронизация (GitHub) -->
         <div class="accordion-card">
           <button type="button" class="accordion-header" onclick="toggleAccordion(this)">☁️ Облачная синхронизация</button>
           <div class="accordion-body">
             <div style="margin-bottom: 12px;">
-              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Секретный токен GitHub (ghp_...)</label>
-              <input type="password" id="sync-token" placeholder="Вставьте токен..." class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">Секретный токен GitHub</label>
+              <input type="password" id="sync-token" class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
             </div>
             <div style="margin-bottom: 12px;">
-              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">ID Базы (Gist ID) — появится автоматически после 1-й выгрузки</label>
-              <input type="text" id="sync-gist-id" placeholder="Заполнится само..." class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
+              <label style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 6px;">ID Базы (Gist ID)</label>
+              <input type="text" id="sync-gist-id" class="app-input" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;">
             </div>
             <div style="display: flex; gap: 8px;">
               <button type="button" onclick="uploadToCloud()" style="flex: 1; padding: 14px; background: #2a9d8f; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">⬆️ В облако</button>
@@ -202,12 +196,11 @@
           </div>
         </div>
 
-        <!-- Блок 5: Пул API Ключей Gemini -->
         <div class="accordion-card">
           <button type="button" class="accordion-header" onclick="toggleAccordion(this)">🔑 Пул API Ключей Gemini</button>
           <div class="accordion-body">
             <div id="apiKeysContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;"></div>
-            <button type="button" id="addApiKeyBtn" class="tab-btn-action" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; padding: 6px 12px;">➕ Добавить новый API Ключ</button>
+            <button type="button" id="addApiKeyBtn" class="tab-btn-action" style="background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; cursor: pointer; padding: 6px 12px;">➕ Добавить API Ключ</button>
           </div>
         </div>
 
@@ -229,89 +222,7 @@
     <button class="btn-submit btn-full-width" id="wpAddBtn" style="display:none;">Добавить в словарь</button>
   </div>
 
-  <!-- Подключаем скрипты (лишнее дублирование убрано) -->
-<script src="database.js?v=4"></script>
-  <script src="app.js?v=4"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then((reg) => {
-          console.log('Service Worker зарегистрирован!', reg);
-
-          // 1. Если обновление уже скачалось и ждет в фоне
-          if (reg.waiting) {
-            showUpdateToast(reg.waiting);
-          }
-
-          // 2. Принудительно заставляем браузер проверить свежую версию на сервере прямо сейчас
-          reg.update();
-
-          // 3. Отслеживаем появление нового воркера
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                showUpdateToast(newWorker);
-              }
-            });
-          });
-        });
-
-        let refreshing = false;
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!refreshing) {
-            refreshing = true;
-            window.location.reload();
-          }
-        });
-      });
-    }
-
-    // Красивое уведомление об обновлении внизу экрана
-    function showUpdateToast(worker) {
-      let toast = document.getElementById('updateToast');
-      if (toast) return;
-
-      toast = document.createElement('div');
-      toast.id = 'updateToast';
-      toast.style.cssText = `
-        position: fixed;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #6366f1, #a855f7);
-        color: #fff;
-        padding: 14px 20px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        z-index: 10000;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 600;
-        animation: slideUp 0.3s ease-out;
-      `;
-      toast.innerHTML = `
-        <span>✨ Доступна новая версия приложения!</span>
-        <button id="reloadAppBtn" style="
-          background: #fff;
-          color: #4f46e5;
-          border: none;
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-weight: 700;
-          cursor: pointer;
-        ">Обновить</button>
-      `;
-
-      document.body.appendChild(toast);
-
-      document.getElementById('reloadAppBtn').addEventListener('click', () => {
-        worker.postMessage({ type: 'SKIP_WAITING' });
-      });
-    }
-  </script>
+  <script src="database.js?v=stable"></script>
+  <script src="app.js?v=stable"></script>
 </body>
 </html>
