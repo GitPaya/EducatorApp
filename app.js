@@ -2036,3 +2036,82 @@ window.toggleAccordion = function(header) {
   const card = header.parentElement;
   card.classList.toggle('active');
 };
+// --- СВАЙПЫ (TINDER-STYLE) И ВИБРАЦИЯ (ДЛЯ МОБИЛЬНЫХ) ---
+(function initSwipes() {
+  const card = document.getElementById("flashcard");
+  if (!card) return;
+
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  const swipeThreshold = 100; // На сколько пикселей нужно сдвинуть для срабатывания
+
+  // Начало касания
+  card.addEventListener("touchstart", (e) => {
+    // Если карточка не перевернута (нет кнопок), не даем свайпать, 
+    // чтобы сначала прочитал ответ (или убери это условие, если хочешь свайпать сразу)
+    if (!card.classList.contains("flipped")) return; 
+    
+    startX = e.touches[0].clientX;
+    isDragging = true;
+    card.style.transition = "none"; // Отключаем плавность, чтобы карточка липла к пальцу
+  }, { passive: true });
+
+  // Движение пальца
+  card.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    currentX = e.touches[0].clientX;
+    const diffX = currentX - startX;
+    
+    // Вращение и сдвиг за пальцем (Tinder эффект)
+    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+  }, { passive: true });
+
+  // Отпускание пальца
+  card.addEventListener("touchend", () => {
+    if (!isDragging) return;
+    isDragging = false;
+    const diffX = currentX - startX;
+
+    card.style.transition = "transform 0.4s ease-out, opacity 0.4s ease-out"; // Возвращаем плавность анимации
+
+    if (Math.abs(diffX) > swipeThreshold) {
+      // --- СВАЙП ЗАСЧИТАН ---
+      if (diffX > 0) {
+        // СВАЙП ВПРАВО (Знаю / Хорошо)
+        if (navigator.vibrate) navigator.vibrate(50); // Короткая, приятная вибрация успеха
+        
+        card.style.transform = "translateX(150vw) rotate(30deg)"; // Улетает вправо
+        card.style.opacity = "0";
+        
+        setTimeout(() => {
+          // Имитируем нажатие на кнопку "Хорошо" (3-я кнопка)
+          const btns = document.querySelectorAll('.srs-btn');
+          if (btns.length > 2) btns[2].click();
+          resetCardStyle();
+        }, 300);
+      } else {
+        // СВАЙП ВЛЕВО (Не знаю / Снова)
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]); // Двойная резкая вибрация (ошибка)
+        
+        card.style.transform = "translateX(-150vw) rotate(-30deg)"; // Улетает влево
+        card.style.opacity = "0";
+        
+        setTimeout(() => {
+          // Имитируем нажатие на кнопку "Снова" (1-я кнопка)
+          const btns = document.querySelectorAll('.srs-btn');
+          if (btns.length > 0) btns[0].click();
+          resetCardStyle();
+        }, 300);
+      }
+    } else {
+      // --- НЕ ДОТЯНУЛ --- (возвращаем по центру)
+      resetCardStyle();
+    }
+  });
+
+  function resetCardStyle() {
+    card.style.transform = "";
+    card.style.opacity = "1";
+  }
+})();
